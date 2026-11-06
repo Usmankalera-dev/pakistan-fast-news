@@ -24,6 +24,9 @@ FEEDS = [
 CATS = ["pakistan", "world", "business", "sports", "tech", "entertainment"]
 CAT_LABEL = {"pakistan": "Pakistan", "world": "World", "business": "Business",
              "sports": "Sports", "tech": "Tech", "entertainment": "Entertainment"}
+LOGOS = {"Dawn": ("logo-dawn.png", 84, 20), "ARY News": ("logo-ary.svg", 22, 24),
+         "Dawn Images": ("logo-dawn.png", 84, 20)}
+NS = {"media": "http://search.yahoo.com/mrss/"}
 KW = {
     "sports": ["cricket", "football", "hockey", "psl", "match", "tournament", "athlete", "olympic", "fifa", "tennis", "badminton", "squash", "snooker", "world cup", "t20", "odi", "test match", "batsman", "bowler", "pcb", "fifa", "champions trophy"],
     "business": ["economy", "rupee", "dollar", "imf", "stock", "market", "trade", "inflation", "budget", "tax", "gdp", "remittance", "petrol", "diesel", "interest rate", "sbp", "psx", "business", "exports", "imports", "tariff"],
@@ -79,9 +82,15 @@ def fetch():
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
             dt = dt.astimezone(PKT)
-            desc = clean(it.findtext("description"))[:180]
+            desc = clean(it.findtext("description"))[:400]
+            img = None
+            mc = it.find("media:content", NS)
+            if mc is None:
+                mc = it.find("media:thumbnail", NS)
+            if mc is not None:
+                img = mc.get("url")
             items.append({"title": title, "link": link, "dt": dt, "desc": desc,
-                          "source": source, "cat": categorize(title, desc, feed_cat)})
+                          "source": source, "cat": categorize(title, desc, feed_cat), "img": img})
     items.sort(key=lambda x: x["dt"], reverse=True)
     return items
 
@@ -95,11 +104,19 @@ def rel(dt, now):
 
 def card(it, now, big=False):
     cls = "card hero" if big else "card"
-    return (f'<article class="{cls}"><div class="meta"><span class="chip {it["cat"]}">{CAT_LABEL[it["cat"]]}</span>'
+    logo, lw, lh = LOGOS.get(it["source"], ("logo-dawn.png", 84, 20))
+    thumb = ""
+    if it.get("img"):
+        thumb = (f"<a class=\"thumbwrap\" href=\"{H.escape(it['link'])}\" target=\"_blank\" rel=\"noopener\" tabindex=\"-1\" aria-hidden=\"true\">"
+                 f"<img class=\"thumb\" src=\"{H.escape(it['img'])}\" alt=\"\" loading=\"lazy\" onerror=\"this.closest('.thumbwrap').remove()\"></a>")
+    return (f'<article class="{cls}">{thumb}<div class="meta">'
+            f'<img class="srclogo" src="{logo}" alt="{H.escape(it["source"])} logo" width="{lw}" height="{lh}" loading="lazy">'
             f'<span class="src">{H.escape(it["source"])}</span>'
+            f'<span class="chip {it["cat"]}">{CAT_LABEL[it["cat"]]}</span>'
             f'<time datetime="{it["dt"].isoformat()}">{rel(it["dt"], now)} · {it["dt"].strftime("%d %b %Y, %I:%M %p")} PKT</time></div>'
             f'<h3><a href="{H.escape(it["link"])}" target="_blank" rel="noopener">{H.escape(it["title"])}</a></h3>'
-            + (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "") + '</article>')
+            + (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "")
+            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a></article>')
 
 def nav(active=""):
     links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS]
@@ -133,7 +150,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 </head>
 <body>
 <header class="topbar"><div class="wrap">
-<a class="logo" href="index.html"><span class="bolt">⚡</span> Pakistan <b>Fast News</b></a>
+<a class="logo" href="index.html"><img src="favicon.svg" alt="" width="26" height="26" class="sitelogo"> Pakistan <b>Fast News</b></a>
 <div class="clock"><span id="clock"></span><span class="upd">Updated {now_s}</span></div>
 </div></header>
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
@@ -144,6 +161,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 </main>
 <footer><div class="wrap">
 <p><b>Pakistan Fast News</b> — the fastest headlines from Pakistan and the world. Headlines link to the original publishers (Dawn, ARY News); we do not copy full articles.</p>
+<p class="fine">Source names and logos belong to their publishers (Dawn, ARY News). Headlines and images link to the original stories.</p>
 <p class="fine">Sections: {", ".join(f'<a href="{c}.html">{CAT_LABEL[c]}</a>' for c in CATS)} · Updated {now_s} · Built for speed: no ads, no trackers, no heavy scripts.</p>
 </div></footer>
 <script src="script.js" defer></script>

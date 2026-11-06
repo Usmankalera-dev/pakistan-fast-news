@@ -25,7 +25,12 @@ h2 .more{float:right;font-size:14px;font-weight:400}
 .card:hover{border-color:#c8102e}
 .card h3{font-size:18px;line-height:1.35;margin:8px 0 6px}
 .card h3 a{color:#111}.card h3 a:hover{color:#c8102e}
-.card p{font-size:15px;color:#444;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card p{font-size:15px;color:#444}
+.thumbwrap{display:block;aspect-ratio:16/9;overflow:hidden;border-radius:8px;margin-bottom:10px;background:#f0f0f0}
+.thumb{width:100%;height:100%;object-fit:cover;display:block}
+.srclogo{height:20px;width:auto;vertical-align:middle}
+.sitelogo{vertical-align:-6px}
+.readmore{display:inline-block;margin-top:8px;font-weight:700;font-size:14px;color:#c8102e}
 .card.hero{border:2px solid #c8102e;background:#fff5f5}
 .card.hero h3{font-size:24px}
 .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:#666}
