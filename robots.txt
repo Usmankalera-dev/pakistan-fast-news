@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://usmankalera-dev.github.io/pakistan-fast-news/sitemap.xml

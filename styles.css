@@ -1,0 +1,40 @@
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#111;background:#fff;line-height:1.55;font-size:17px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 16px}
+a{color:#0b5ed7;text-decoration:none}
+a:hover{text-decoration:underline}
+.topbar{background:#111;color:#fff;padding:14px 0}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{color:#fff;font-size:24px;font-weight:400;letter-spacing:-.5px}
+.logo b{color:#ff3b30}.logo .bolt{color:#ff3b30}
+.logo:hover{text-decoration:none}
+.clock{font-size:13px;color:#ccc;text-align:right}
+.clock .upd{display:block;color:#999}
+.mainnav{background:#c8102e;position:sticky;top:0;z-index:10}
+.mainnav .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.mainnav a{color:#fff;padding:11px 13px;font-size:15px;font-weight:600;white-space:nowrap}
+.mainnav a:hover{background:#a50d26;text-decoration:none}
+.mainnav a.active{background:#8f0b20}
+main{padding:18px 0 8px}
+h1{font-size:28px;margin:6px 0 12px;letter-spacing:-.5px}
+h2{font-size:21px;margin:26px 0 12px;border-bottom:3px solid #c8102e;padding-bottom:6px}
+h2 .more{float:right;font-size:14px;font-weight:400}
+.search input{width:100%;padding:11px 13px;font-size:16px;border:1px solid #ccc;border-radius:8px;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{border:1px solid #e3e3e3;border-radius:10px;padding:14px 16px;background:#fff}
+.card:hover{border-color:#c8102e}
+.card h3{font-size:18px;line-height:1.35;margin:8px 0 6px}
+.card h3 a{color:#111}.card h3 a:hover{color:#c8102e}
+.card p{font-size:15px;color:#444;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.hero{border:2px solid #c8102e;background:#fff5f5}
+.card.hero h3{font-size:24px}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:#666}
+.chip{color:#fff;background:#555;padding:2px 8px;border-radius:20px;font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+.chip.pakistan{background:#0b7a3e}.chip.world{background:#0b5ed7}.chip.business{background:#7a5a00}
+.chip.sports{background:#c8102e}.chip.tech{background:#5b21b6}.chip.entertainment{background:#c026d3}
+.src{font-weight:700;color:#333}
+.crumb{font-size:14px;color:#666;margin-bottom:12px}
+footer{background:#111;color:#bbb;margin-top:34px;padding:26px 0;font-size:14px}
+footer a{color:#ddd}
+footer .fine{margin-top:8px;color:#888}
+@media(max-width:640px){body{font-size:16px}h1{font-size:23px}.card.hero h3{font-size:20px}.logo{font-size:20px}.clock{display:none}}
