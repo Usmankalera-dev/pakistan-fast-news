@@ -171,11 +171,32 @@ def nav(active=""):
     out = []
     for href, label in links:
         cls = ' class="active"' if href == active else ""
+        if href == "videos.html":
+            label = "▶ Videos"
+            cls = ' class="vidlink active"' if href == active else ' class="vidlink"'
         out.append(f'<a href="{href}"{cls}>{label}</a>')
     return "\n".join(out)
 
 def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
     now_s = datetime.now(PKT).strftime("%d %B %Y, %I:%M %p PKT")
+    fsecs = "".join(f'<li><a href="{c}.html">{CAT_LABEL[c]}</a></li>' for c in CATS)
+    fsecs += '<li><a href="videos.html">▶ Videos</a></li>'
+    fchans = "".join(
+        f'<li><a class="fchan" href="videos.html#{slug}"><img src="yt-{slug}.jpg" alt="" width="22" height="22" loading="lazy">{name}</a></li>'
+        for name, _cid, slug in YT_CHANNELS)
+    footer_html = (
+        '<footer><div class="wrap"><div class="fgrid">'
+        '<div class="fcol fbrand"><a class="flogo" href="index.html"><img src="favicon.svg" alt="" width="38" height="38"> Pakistan <b>Fast News</b></a>'
+        '<p>The fastest headlines from Pakistan and the world — politics, business, sports, tech and entertainment, updated around the clock.</p>'
+        '<p>Fast and free: no ads, no trackers, no heavy scripts.</p></div>'
+        '<div class="fcol"><h4>Sections</h4><ul>' + fsecs + '</ul></div>'
+        '<div class="fcol"><h4>Watch</h4><ul>' + fchans + '</ul></div>'
+        '<div class="fcol"><h4>Sources</h4><p>Headlines from:</p>'
+        '<span class="srclogochip"><img src="logo-dawn.png" alt="Dawn logo" height="22"></span>'
+        '<span class="srclogochip"><img src="logo-ary.svg" alt="ARY News logo" height="28"></span>'
+        '<p class="fine">Full stories open on the publishers\u2019 sites — we never copy full articles. Videos play from the channels\u2019 official YouTube channels.</p></div>'
+        '</div><div class="fbot"><span>© 2026 Pakistan Fast News</span>'
+        '<span>Updated ' + now_s + ' · <a href="sitemap.xml">Sitemap</a></span></div></div></footer>')
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,8 +219,8 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 </head>
 <body>
 <header class="topbar"><div class="wrap">
-<a class="logo" href="index.html"><img src="favicon.svg" alt="" width="26" height="26" class="sitelogo"> Pakistan <b>Fast News</b></a>
-<div class="clock"><span id="clock"></span><span class="upd">Updated {now_s}</span></div>
+<a class="logo" href="index.html"><img src="favicon.svg" alt="Pakistan Fast News logo" width="36" height="36" class="sitelogo"><span class="logotext">Pakistan <b>Fast News</b><small>Pakistan's fastest headlines</small></span></a>
+<div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">Updated {now_s}</span></div>
 </div></header>
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
 <main class="wrap">
@@ -207,11 +228,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <div class="search"><input id="q" type="search" placeholder="Search headlines…" aria-label="Search headlines"></div>
 {body_html}
 </main>
-<footer><div class="wrap">
-<p><b>Pakistan Fast News</b> — the fastest headlines from Pakistan and the world. Headlines link to the original publishers (Dawn, ARY News); we do not copy full articles.</p>
-<p class="fine">Source names and logos belong to their publishers (Dawn, ARY News). Headlines and images link to the original stories. Videos play from the channels' official YouTube channels.</p>
-<p class="fine">Sections: {", ".join(f'<a href="{c}.html">{CAT_LABEL[c]}</a>' for c in CATS)} · Updated {now_s} · Built for speed: no ads, no trackers, no heavy scripts.</p>
-</div></footer>
+{footer_html}
 <script src="script.js" defer></script>
 </body>
 </html>
@@ -299,6 +316,7 @@ cards.forEach(function(c){var ok=(ch==='all'?c.dataset.new==='1':c.dataset.ch===
 count.textContent=n+' video'+(n===1?'':'s')+(ch==='all'?' — latest across all channels':' — '+document.querySelector('.chan.active span:last-child').textContent);}
 document.querySelectorAll('.chan').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.chan').forEach(function(x){x.classList.remove('active')});b.classList.add('active');show();});});
 document.getElementById('vq').addEventListener('input',show);show();
+var h=location.hash.slice(1);if(h){var hb=document.querySelector('.chan[data-ch="'+h+'"]');if(hb)hb.click();}
 var modal=document.getElementById('modal'),player=document.getElementById('player');
 function openVid(vid,title,chname,desc){document.getElementById('modaltitle').textContent=title;
 document.getElementById('modaldesc').textContent=desc||'';var a=document.getElementById('modalyt');a.href='https://www.youtube.com/watch?v='+vid;a.textContent='Watch on YouTube ('+chname+') →';
