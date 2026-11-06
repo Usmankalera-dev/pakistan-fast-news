@@ -43,3 +43,34 @@ footer{background:#111;color:#bbb;margin-top:34px;padding:26px 0;font-size:14px}
 footer a{color:#ddd}
 footer .fine{margin-top:8px;color:#888}
 @media(max-width:640px){body{font-size:16px}h1{font-size:23px}.card.hero h3{font-size:20px}.logo{font-size:20px}.clock{display:none}}
+
+.chanbar{display:flex;gap:14px;overflow-x:auto;padding:8px 2px 14px;scrollbar-width:thin}
+.chan{flex:0 0 auto;background:none;border:2px solid transparent;border-radius:12px;padding:6px 4px;cursor:pointer;font:inherit;color:#111}
+.chan span{display:block;font-size:13px;font-weight:600;margin-top:5px;max-width:84px;text-align:center}
+.chanlogo{width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;border:2px solid #ddd;background:#fff}
+.chanlogo.all{display:flex;align-items:center;justify-content:center;background:#c8102e;color:#fff;font-weight:800;font-size:15px}
+.chan.active{border-color:#c8102e;background:#fff5f5}
+.vintro{font-size:15px;color:#444;margin-bottom:8px}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.vcard{border:1px solid #e3e3e3;border-radius:10px;padding:10px;background:#fff}
+.vthumb{position:relative;display:block;width:100%;aspect-ratio:16/9;border:0;padding:0;border-radius:8px;overflow:hidden;cursor:pointer;background:#000}
+.vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vthumb .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:34px;text-shadow:0 2px 8px rgba(0,0,0,.6);background:rgba(0,0,0,.18)}
+.vthumb:hover .play{color:#ff3b30}
+.livebadge{position:absolute;top:8px;left:8px;background:#c8102e;color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:4px}
+.vmeta{display:flex;gap:7px;align-items:center;margin:9px 0 5px;font-size:12.5px;color:#666}
+.vchanlogo{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.vsrc{font-weight:700;color:#333}
+.vcard h3{font-size:16px;line-height:1.35;margin:2px 0}
+.vtitle{background:none;border:0;padding:0;font:inherit;font-weight:700;color:#111;cursor:pointer;text-align:left}
+.vtitle:hover{color:#c8102e}
+.vcount{font-size:14px;color:#666;margin:14px 0}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modalbox{background:#fff;border-radius:12px;max-width:860px;width:100%;padding:16px;max-height:92vh;overflow:auto}
+.modalbox h3{font-size:19px;margin:12px 0 6px}
+.modalbox p{font-size:14.5px;color:#444}
+.modalclose{float:right;background:#111;color:#fff;border:0;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer}
+.playerwrap{position:relative;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden}
+.playerwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@media(max-width:640px){.chanlogo{width:54px;height:54px}}

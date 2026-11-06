@@ -22,6 +22,19 @@ FEEDS = [
     ("https://arynews.tv/feed/", "ARY News", None),
 ]
 CATS = ["pakistan", "world", "business", "sports", "tech", "entertainment"]
+YT_CHANNELS = [
+    ("Geo News", "UC_vt34wimdCzdkrzVejwX9g", "geo"),
+    ("ARY News", "UCMmpLL2ucRHAXbNHiCPyIyg", "ary"),
+    ("Dawn News", "UCaxR-D8FjZ-2otbU0_Y2grg", "dawn"),
+    ("Samaa TV", "UCJekW1Vj5fCVEGdye_mBN6Q", "samaa"),
+    ("Dunya News", "UCnMBV5Iw4WqKILKue1nP6Hg", "dunya"),
+    ("Express News", "UCTur7oM6mLL0rM2k0znuZpQ", "express"),
+    ("Hum News", "UC0Um3pnZ2WGBEeoA3BX2sKw", "hum"),
+    ("BOL News", "UC2ToZG9RA1_A5kRwxqP7rZg", "bol"),
+    ("92 News HD", "UCsgC5cbz3DE2Shh34gNKiog", "92news"),
+    ("Aaj News", "UCgBAPAcLsh_MAPvJprIz89w", "aaj"),
+    ("Neo News", "UCoVaeayixjVI12mAlmMSsXg", "neo"),
+]
 CAT_LABEL = {"pakistan": "Pakistan", "world": "World", "business": "Business",
              "sports": "Sports", "tech": "Tech", "entertainment": "Entertainment"}
 LOGOS = {"Dawn": ("logo-dawn.png", 84, 20), "ARY News": ("logo-ary.svg", 22, 24),
@@ -94,6 +107,41 @@ def fetch():
     items.sort(key=lambda x: x["dt"], reverse=True)
     return items
 
+YTNS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
+        "m": "http://search.yahoo.com/mrss/"}
+
+def fetch_videos():
+    videos = []
+    for name, cid, slug in YT_CHANNELS:
+        try:
+            req = urllib.request.Request(
+                f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}", headers=UA)
+            data = urllib.request.urlopen(req, timeout=20).read()
+            root = ET.fromstring(data)
+        except Exception as e:
+            print("yt feed failed:", name, e)
+            continue
+        for e in root.findall("a:entry", YTNS):
+            vid = e.findtext("yt:videoId", namespaces=YTNS)
+            title = clean(e.findtext("a:title", namespaces=YTNS))
+            link = None
+            for ln in e.findall("a:link", YTNS):
+                if ln.get("rel") == "alternate":
+                    link = ln.get("href")
+            try:
+                dt = datetime.fromisoformat((e.findtext("a:published", namespaces=YTNS) or "").replace("Z", "+00:00"))
+                dt = dt.astimezone(PKT)
+            except Exception:
+                dt = datetime.now(PKT)
+            th = e.find("m:group/m:thumbnail", YTNS)
+            thumb = th.get("url") if th is not None else (f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg" if vid else None)
+            desc = clean(e.findtext("m:group/m:description", namespaces=YTNS))[:160]
+            if vid and title:
+                videos.append({"vid": vid, "title": title, "link": link or f"https://www.youtube.com/watch?v={vid}",
+                               "dt": dt, "thumb": thumb, "desc": desc, "channel": name, "slug": slug})
+    videos.sort(key=lambda x: x["dt"], reverse=True)
+    return videos
+
 def rel(dt, now):
     mins = max(0, int((now - dt).total_seconds() // 60))
     if mins < 1: return "just now"
@@ -119,7 +167,7 @@ def card(it, now, big=False):
             + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a></article>')
 
 def nav(active=""):
-    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS]
+    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("videos.html", "Videos")]
     out = []
     for href, label in links:
         cls = ' class="active"' if href == active else ""
@@ -161,7 +209,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 </main>
 <footer><div class="wrap">
 <p><b>Pakistan Fast News</b> — the fastest headlines from Pakistan and the world. Headlines link to the original publishers (Dawn, ARY News); we do not copy full articles.</p>
-<p class="fine">Source names and logos belong to their publishers (Dawn, ARY News). Headlines and images link to the original stories.</p>
+<p class="fine">Source names and logos belong to their publishers (Dawn, ARY News). Headlines and images link to the original stories. Videos play from the channels' official YouTube channels.</p>
 <p class="fine">Sections: {", ".join(f'<a href="{c}.html">{CAT_LABEL[c]}</a>' for c in CATS)} · Updated {now_s} · Built for speed: no ads, no trackers, no heavy scripts.</p>
 </div></footer>
 <script src="script.js" defer></script>
@@ -219,8 +267,69 @@ def main():
             f"Latest {CAT_LABEL[c].lower()} news from Pakistan and the world, updated fast. Headlines from Dawn and ARY News.",
             f"{BASE}/{c}.html", f"{CAT_LABEL[c]} news", body, json.dumps(ld, ensure_ascii=False), f"{c}.html"), encoding="utf-8")
 
+    # ---- Videos page ----
+    videos = fetch_videos()
+    print("videos:", len(videos), "| by channel:", {n: sum(1 for v in videos if v["channel"] == n) for n, _, _ in YT_CHANNELS})
+    chan_btns = ['<button class="chan active" data-ch="all"><span class="chanlogo all">ALL</span><span>All Channels</span></button>']
+    for name, cid, slug in YT_CHANNELS:
+        chan_btns.append(
+            '<button class="chan" data-ch="' + slug + '"><img class="chanlogo" src="yt-' + slug + '.jpg" alt="' + H.escape(name) + ' logo" width="64" height="64" loading="lazy"><span>' + H.escape(name) + '</span></button>')
+    vcards = []
+    for i, v in enumerate(videos):
+        live = "LIVE" if ("live" in v["title"].lower() or v["title"].startswith("🔴")) else ""
+        vcards.append(
+            '<article class="vcard" data-ch="' + v["slug"] + '" data-title="' + H.escape(v["title"].lower()) + '" data-new="' + ('1' if i < 36 else '0') + '">'
+            '<button class="vthumb" data-vid="' + v["vid"] + '" data-title="' + H.escape(v["title"]) + '" data-chname="' + H.escape(v["channel"]) + '" data-desc="' + H.escape(v["desc"]) + '" aria-label="Play video">'
+            '<img src="' + H.escape(v["thumb"]) + '" alt="" loading="lazy" onerror="this.src=\'https://i.ytimg.com/vi/' + v["vid"] + '/hqdefault.jpg\'">'
+            '<span class="play">▶</span>' + ('<span class="livebadge">🔴 LIVE</span>' if live else '') + '</button>'
+            '<div class="vmeta"><img class="vchanlogo" src="yt-' + v["slug"] + '.jpg" alt="' + H.escape(v["channel"]) + ' logo" width="28" height="28" loading="lazy">'
+            '<span class="vsrc">' + H.escape(v["channel"]) + '</span>'
+            '<time datetime="' + v["dt"].isoformat() + '">' + rel(v["dt"], now) + '</time></div>'
+            '<h3><button class="vtitle" data-vid="' + v["vid"] + '" data-title="' + H.escape(v["title"]) + '" data-chname="' + H.escape(v["channel"]) + '" data-desc="' + H.escape(v["desc"]) + '">' + H.escape(v["title"]) + '</button></h3></article>')
+    vids_ld = {"@context": "https://schema.org", "@type": "ItemList", "name": "Pakistan News Videos",
+               "itemListElement": [{"@type": "VideoObject", "position": i + 1, "name": v["title"],
+                                    "description": v["desc"], "thumbnailUrl": v["thumb"],
+                                    "uploadDate": v["dt"].isoformat(),
+                                    "embedUrl": "https://www.youtube-nocookie.com/embed/" + v["vid"],
+                                    "contentUrl": v["link"]} for i, v in enumerate(videos[:10])]}
+    videos_js = """
+(function(){var grid=document.getElementById('vgrid'),cards=Array.from(grid.children),count=document.getElementById('vcount');
+function show(){var ch=document.querySelector('.chan.active').dataset.ch,q=(document.getElementById('vq').value||'').toLowerCase(),n=0;
+cards.forEach(function(c){var ok=(ch==='all'?c.dataset.new==='1':c.dataset.ch===ch)&&(!q||c.dataset.title.indexOf(q)>-1);c.style.display=ok?'':'none';if(ok)n++;});
+count.textContent=n+' video'+(n===1?'':'s')+(ch==='all'?' — latest across all channels':' — '+document.querySelector('.chan.active span:last-child').textContent);}
+document.querySelectorAll('.chan').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.chan').forEach(function(x){x.classList.remove('active')});b.classList.add('active');show();});});
+document.getElementById('vq').addEventListener('input',show);show();
+var modal=document.getElementById('modal'),player=document.getElementById('player');
+function openVid(vid,title,chname,desc){document.getElementById('modaltitle').textContent=title;
+document.getElementById('modaldesc').textContent=desc||'';var a=document.getElementById('modalyt');a.href='https://www.youtube.com/watch?v='+vid;a.textContent='Watch on YouTube ('+chname+') →';
+player.src='https://www.youtube-nocookie.com/embed/'+vid+'?autoplay=1&rel=0';modal.hidden=false;document.body.style.overflow='hidden';}
+function closeVid(){player.src='';modal.hidden=true;document.body.style.overflow='';}
+grid.addEventListener('click',function(e){var b=e.target.closest('[data-vid]');if(b)openVid(b.dataset.vid,b.dataset.title,b.dataset.chname,b.dataset.desc);});
+document.getElementById('modalclose').addEventListener('click',closeVid);
+modal.addEventListener('click',function(e){if(e.target===modal)closeVid();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeVid();});
+})();
+"""
+    videos_body = (
+        '<p class="crumb"><a href="index.html">Home</a> / Videos</p>'
+        '<p class="vintro">Latest videos from Pakistan\u2019s top news channels. Tap a channel logo to see only its videos, then tap any video to play it right here on this site.</p>'
+        '<div class="chanbar" role="group" aria-label="News channels">' + ''.join(chan_btns) + '</div>'
+        '<div class="search"><input id="vq" type="search" placeholder="Search videos\u2026" aria-label="Search videos"></div>'
+        '<div class="vgrid" id="vgrid">' + ''.join(vcards) + '</div>'
+        '<p class="vcount" id="vcount"></p>'
+        '<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Video player" hidden>'
+        '<div class="modalbox"><button class="modalclose" id="modalclose" aria-label="Close player">✕</button>'
+        '<div class="playerwrap"><iframe id="player" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
+        '<h3 id="modaltitle"></h3><p id="modaldesc"></p>'
+        '<p><a id="modalyt" href="#" target="_blank" rel="noopener">Watch on YouTube →</a></p></div></div>'
+        '<script>' + videos_js + '</script>')
+    (out_dir / "videos.html").write_text(page(
+        "Pakistan News Videos — Watch Geo, ARY, Dawn, Samaa & More",
+        "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
+        BASE + "/videos.html", "Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
+
     # ---- sitemap + robots + 404 ----
-    urls = [("", "1.0")] + [(f"{c}.html", "0.8") for c in CATS]
+    urls = [("", "1.0"), ("videos.html", "0.9")] + [(f"{c}.html", "0.8") for c in CATS]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, pr in urls:
         sm.append(f"<url><loc>{BASE}/{u}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>")
