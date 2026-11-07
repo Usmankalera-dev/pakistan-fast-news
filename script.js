@@ -30,8 +30,14 @@
           var when = it.pubDate ? new Date(it.pubDate) : new Date();
           art.innerHTML = '<div class="meta"><img class="srclogo" src="logo-dawn.png" alt="Dawn logo" width="84" height="20" loading="lazy"><span class="src">Dawn</span><span class="chip pakistan">Pakistan</span><time>' +
             when.toLocaleString("en-GB", { timeZone: "Asia/Karachi", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true }) +
-            ' PKT</time></div><h3><a href="' + it.link + '" target="_blank" rel="noopener"></a></h3><a class="readmore" href="' + it.link + '" target="_blank" rel="noopener">Read full story at Dawn →</a>';
+            ' PKT</time></div><h3><a href="' + it.link + '" target="_blank" rel="noopener"></a></h3><a class="readmore" href="' + it.link + '" target="_blank" rel="noopener">Read full story at Dawn →</a>' +
+            '<div class="share"><a class="share-wa" href="https://wa.me/?text=' + encodeURIComponent(it.title + " " + it.link) + '" target="_blank" rel="noopener">WhatsApp ↗</a>' +
+            '<button class="share-copy" type="button" data-link="' + it.link.replace(/"/g, "%22") + '">Copy link</button>' +
+            '<button class="share-native" type="button" data-link="' + it.link.replace(/"/g, "%22") + '">Share</button></div>';
           art.querySelector("h3 a").textContent = it.title;
+          var nb = art.querySelector(".share-native");
+          nb.setAttribute("data-title", it.title);
+          if (navigator.share) { nb.style.display = "inline-block"; }
           latest.prepend(art);
         });
       }).catch(function () { /* keep the baked headlines */ });
