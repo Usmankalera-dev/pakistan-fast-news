@@ -243,7 +243,14 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 </div></header>
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
 {ticker}<main class="wrap">
-<div class="today" id="today-widget" role="status"><span class="today-item"><b>$1</b> = <span id="w-usd">…</span></span><span class="today-item">🪙 Gold 1 tola ≈ <span id="w-gold">…</span></span><span class="today-item">🌤️ <span id="w-weather">…</span></span><span class="today-item">🕌 <span id="w-prayer">…</span></span><span class="today-src" id="w-updated"></span><span class="today-forecast" id="w-forecast"></span></div>
+<div class="today" id="today-widget" role="status">
+<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span></span></div>
+<div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
+<div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
+<div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval" id="w-prayer">…</span></div>
+<div class="trow"><span class="tlabel">📅 Lahore · 7 days</span><span class="tval"><span class="fgrid" id="w-forecast"></span></span></div>
+<div class="tsrc" id="w-updated"></div>
+</div>
 <h1>{H.escape(h1)}</h1>
 <div class="search"><input id="q" type="search" placeholder="Search headlines…" aria-label="Search headlines"></div>
 {body_html}

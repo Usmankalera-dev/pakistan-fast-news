@@ -83,6 +83,7 @@
     if (cd) cd.textContent = h > 0 ? (ur ? "(" + h + " گھنٹے " + m + " منٹ میں)" : "(in " + h + "h " + m + "m)") : (ur ? "(" + m + " منٹ میں)" : "(in " + m + "m)");
     var nb = document.querySelector("#w-prayer .next");
     if (nb) nb.textContent = next.n + " " + next.s;
+    document.querySelectorAll("#w-prayer .ptime").forEach(function (el) { el.classList.toggle("now", el.getAttribute("data-k") === next.k); });
   }
   Promise.all([usd, gold, wx, pr, fc]).then(function (res) {
     var pkr = res[0], g = res[1], wxx = res[2], t = res[3];
@@ -95,7 +96,7 @@
     var wc = { 0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️", 45: "🌫️", 48: "🌫️", 51: "🌦️", 53: "🌦️", 55: "🌦️", 61: "🌧️", 63: "🌧️", 65: "🌧️", 71: "❄️", 73: "❄️", 75: "❄️", 95: "⛈️" };
     if (wxx && wxx.length >= 3) {
       var names = ur ? ["لاہور", "کراچی", "اسلام آباد"] : ["Lahore", "Karachi", "Islamabad"];
-      $("w-weather").textContent = wxx.map(function (c, i) { return names[i] + " " + Math.round(c.current.temperature_2m) + "°C " + (wc[c.current.weather_code] || ""); }).join(" · ");
+      $("w-weather").innerHTML = wxx.map(function (c, i) { return '<span class="wcity">' + names[i] + ' <b>' + Math.round(c.current.temperature_2m) + '°C</b> ' + (wc[c.current.weather_code] || "") + '</span>'; }).join("");
     } else { $("w-weather").textContent = "—"; }
     var f = res[4];
     var fel = document.getElementById("w-forecast");
@@ -104,23 +105,24 @@
       var wdUr = ["اتوار", "پیر", "منگل", "بدھ", "جمعرات", "جمعہ", "ہفتہ"];
       var rows = f.daily.time.map(function (ds, i) {
         var p = ds.split("-"), dow = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
-        return (ur ? wdUr[dow] : wdEn[dow]) + " " + Math.round(f.daily.temperature_2m_max[i]) + "°/" + Math.round(f.daily.temperature_2m_min[i]) + "° " + (wc[f.daily.weather_code[i]] || "");
+        return '<span class="fday"><i>' + (ur ? wdUr[dow] : wdEn[dow]) + '</i><b>' + Math.round(f.daily.temperature_2m_max[i]) + '°/' + Math.round(f.daily.temperature_2m_min[i]) + '°</b>' + (wc[f.daily.weather_code[i]] || "") + '</span>';
       });
-      fel.textContent = (ur ? "لاہور اس ہفتے: " : "Lahore this week: ") + rows.join(" · ");
+      fel.innerHTML = rows.join("");
     }
     if (t) {
       var keys = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
       var names = ur ? ["فجر", "ظہر", "عصر", "مغرب", "عشاء"] : keys;
-      prayerParts = keys.map(function (k, i) { return { n: names[i], m: toMin(t[k]), s: fmt12(t[k]) }; });
+      prayerParts = keys.map(function (k, i) { return { k: k, n: names[i], m: toMin(t[k]), s: fmt12(t[k]) }; });
       var nowMin = pk.d.getHours() * 60 + pk.d.getMinutes(), next = null;
       for (var i = 0; i < prayerParts.length; i++) { if (prayerParts[i].m > nowMin) { next = prayerParts[i]; break; } }
       if (!next) next = prayerParts[0];
-      $("w-prayer").innerHTML = (ur ? "اگلی نماز" : "Next prayer") + ': <b class="next">' + next.n + " " + next.s + '</b> <span id="w-countdown"></span> · ' +
-        prayerParts.map(function (x) { return x.n + " " + x.s; }).join(" · ");
+      $("w-prayer").innerHTML = '<div class="pnext">' + (ur ? "اگلی نماز" : "Next") + ': <b class="next">' + next.n + " " + next.s + '</b> <span id="w-countdown"></span></div>' +
+        '<div class="pgrid">' + prayerParts.map(function (x) { return '<span class="ptime" data-k="' + x.k + '">' + x.n + ' <b>' + x.s + '</b></span>'; }).join("") + '</div>';
       prayerTick(); setInterval(prayerTick, 30000);
     } else { $("w-prayer").textContent = "—"; }
     $("w-updated").textContent = (ur ? "تازہ ترین " : "Live ") +
-      new Date().toLocaleString("en-GB", { timeZone: "Asia/Karachi", hour: "2-digit", minute: "2-digit", hour12: true }) + " PKT";
+      new Date().toLocaleString("en-GB", { timeZone: "Asia/Karachi", hour: "2-digit", minute: "2-digit", hour12: true }) + " PKT" +
+      (ur ? " · ذرائع: exchangerate-api، gold-api، Open-Meteo، Aladhan" : " · Sources: exchangerate-api, gold-api, Open-Meteo, Aladhan");
   });
 })();
 
