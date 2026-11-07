@@ -116,3 +116,9 @@ footer .fine{margin-top:10px;color:#888}
 .fwatch ul{display:grid;grid-template-columns:1fr 1fr;gap:3px 20px}
 .fbot{justify-content:center;text-align:center;flex-direction:column;gap:4px}}
 @media(max-width:430px){.logotext small{font-size:11px}}
+
+/* Urdu edition (Phase 2): RTL + Nastaliq-friendly type, no external font — keeps the site fast */
+html[dir="rtl"] body{font-family:"Noto Nastaliq Urdu","Noto Naskh Arabic",Tahoma,Arial,sans-serif}
+html[dir="rtl"] .card h3{line-height:2.1}
+html[dir="rtl"] .card p{line-height:2}
+html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}

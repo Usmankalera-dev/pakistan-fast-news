@@ -167,7 +167,7 @@ def card(it, now, big=False):
             + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a></article>')
 
 def nav(active=""):
-    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("videos.html", "Videos")]
+    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("videos.html", "Videos"), ("ur/index.html", "اردو")]
     out = []
     for href, label in links:
         cls = ' class="active"' if href == active else ""
@@ -341,13 +341,17 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidd
         '<h3 id="modaltitle"></h3><p id="modaldesc"></p>'
         '<p><a id="modalyt" href="#" target="_blank" rel="noopener">Watch on YouTube →</a></p></div></div>'
         '<script>' + videos_js + '</script>')
-    (out_dir / "videos.html").write_text(page(
-        "Pakistan News Videos — Watch Geo, ARY, Dawn, Samaa & More",
-        "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
-        BASE + "/videos.html", "Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
+    if videos:
+        (out_dir / "videos.html").write_text(page(
+            "Pakistan News Videos — Watch Geo, ARY, Dawn, Samaa & More",
+            "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
+            BASE + "/videos.html", "Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
+    else:
+        # YouTube feeds failed this run — keep the last good videos.html instead of publishing an empty page.
+        print("WARNING: 0 videos fetched — keeping existing videos.html")
 
     # ---- sitemap + robots + 404 ----
-    urls = [("", "1.0"), ("videos.html", "0.9")] + [(f"{c}.html", "0.8") for c in CATS]
+    urls = [("", "1.0"), ("videos.html", "0.9"), ("ur/", "0.9")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, pr in urls:
         sm.append(f"<url><loc>{BASE}/{u}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>")
