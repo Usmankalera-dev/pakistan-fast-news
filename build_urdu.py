@@ -5,6 +5,7 @@ Run: python3 build_urdu.py   (does NOT touch the English pages or build.py)
 Excerpts only; full stories open on the publishers' sites, same as the English edition.
 """
 import html as H, json, re, urllib.request, xml.etree.ElementTree as ET
+from urllib.parse import quote as urlquote
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -120,6 +121,13 @@ def rel(dt, now):
     return f"{h // 24} دن پہلے"
 
 
+def share_row(it):
+    enc = urlquote(it["title"] + " " + it["link"])
+    return (f'<div class="share"><a class="share-wa" href="https://wa.me/?text={enc}" target="_blank" rel="noopener">واٹس ایپ ↗</a>'
+            f'<button class="share-copy" type="button" data-link="{H.escape(it["link"])}">لنک کاپی کریں</button>'
+            f'<button class="share-native" type="button" data-title="{H.escape(it["title"])}" data-link="{H.escape(it["link"])}">شیئر کریں</button></div>')
+
+
 def card(it, now, big=False):
     cls = "card hero" if big else "card"
     logo, lw, lh = LOGOS.get(it["source"], ("logo-urdu-dawn.png", 20, 20))
@@ -137,7 +145,7 @@ def card(it, now, big=False):
             f'<time datetime="{it["dt"].isoformat()}">{rel(it["dt"], now)} · {it["dt"].strftime("%d %b %Y, %I:%M %p")} PKT</time></div>'
             f'<h3><a href="{H.escape(it["link"])}" target="_blank" rel="noopener">{H.escape(it["title"])}</a></h3>'
             + (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "")
-            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">مکمل خبر {H.escape(it["source"])} پر پڑھیں →</a></article>')
+            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">مکمل خبر {H.escape(it["source"])} پر پڑھیں →</a>' + share_row(it) + '</article>')
 
 
 def nav(active=""):
@@ -174,6 +182,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{{var t=localStorage.getItem("pfn-theme");if(t){{document.documentElement.setAttribute("data-theme",t)}}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){{document.documentElement.setAttribute("data-theme","dark")}}}}catch(e){{}}</script>
 <title>{H.escape(title)}</title>
 <meta name="description" content="{H.escape(desc)}">
 <link rel="canonical" href="{canon}">
@@ -193,6 +202,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <header class="topbar"><div class="wrap">
 <a class="logo" href="index.html"><img src="../favicon.svg" alt="پاکستان فاسٹ نیوز لوگو" width="36" height="36" class="sitelogo"><span class="logotext">پاکستان <b>فاسٹ نیوز</b><small>پاکستان کی تیز ترین خبریں</small></span></a>
 <div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">اپ ڈیٹ {now_s}</span></div>
+<button id="theme-toggle" class="themetoggle" type="button" aria-label="ڈارک موڈ">🌙</button>
 </div></header>
 <nav class="mainnav" aria-label="شعبے"><div class="wrap">{nav(active)}</div></nav>
 <main class="wrap">

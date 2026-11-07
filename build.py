@@ -3,6 +3,7 @@
 Run: python3 build.py  (fetches Dawn + ARY feeds, writes HTML pages in this folder)
 """
 import html as H, json, re, urllib.request, xml.etree.ElementTree as ET
+from urllib.parse import quote as urlquote
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -150,6 +151,13 @@ def rel(dt, now):
     if h < 24: return f"{h}h ago"
     return f"{h // 24}d ago"
 
+def share_row(it):
+    enc = urlquote(it["title"] + " " + it["link"])
+    return (f'<div class="share"><a class="share-wa" href="https://wa.me/?text={enc}" target="_blank" rel="noopener">WhatsApp ↗</a>'
+            f'<button class="share-copy" type="button" data-link="{H.escape(it["link"])}">Copy link</button>'
+            f'<button class="share-native" type="button" data-title="{H.escape(it["title"])}" data-link="{H.escape(it["link"])}">Share</button></div>')
+
+
 def card(it, now, big=False):
     cls = "card hero" if big else "card"
     logo, lw, lh = LOGOS.get(it["source"], ("logo-dawn.png", 84, 20))
@@ -164,7 +172,7 @@ def card(it, now, big=False):
             f'<time datetime="{it["dt"].isoformat()}">{rel(it["dt"], now)} · {it["dt"].strftime("%d %b %Y, %I:%M %p")} PKT</time></div>'
             f'<h3><a href="{H.escape(it["link"])}" target="_blank" rel="noopener">{H.escape(it["title"])}</a></h3>'
             + (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "")
-            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a></article>')
+            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a>' + share_row(it) + '</article>')
 
 def nav(active=""):
     links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("videos.html", "Videos"), ("ur/index.html", "اردو")]
@@ -202,6 +210,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{{var t=localStorage.getItem("pfn-theme");if(t){{document.documentElement.setAttribute("data-theme",t)}}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){{document.documentElement.setAttribute("data-theme","dark")}}}}catch(e){{}}</script>
 <title>{H.escape(title)}</title>
 <meta name="description" content="{H.escape(desc)}">
 <link rel="canonical" href="{canon}">
@@ -221,6 +230,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <header class="topbar"><div class="wrap">
 <a class="logo" href="index.html"><img src="favicon.svg" alt="Pakistan Fast News logo" width="36" height="36" class="sitelogo"><span class="logotext">Pakistan <b>Fast News</b><small>Pakistan's fastest headlines</small></span></a>
 <div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">Updated {now_s}</span></div>
+<button id="theme-toggle" class="themetoggle" type="button" aria-label="Dark mode">🌙</button>
 </div></header>
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
 <main class="wrap">
@@ -303,7 +313,7 @@ def main():
             '<div class="vmeta"><img class="vchanlogo" src="yt-' + v["slug"] + '.jpg" alt="' + H.escape(v["channel"]) + ' logo" width="28" height="28" loading="lazy">'
             '<span class="vsrc">' + H.escape(v["channel"]) + '</span>'
             '<time datetime="' + v["dt"].isoformat() + '">' + rel(v["dt"], now) + '</time></div>'
-            '<h3><button class="vtitle" data-vid="' + v["vid"] + '" data-title="' + H.escape(v["title"]) + '" data-chname="' + H.escape(v["channel"]) + '" data-desc="' + H.escape(v["desc"]) + '">' + H.escape(v["title"]) + '</button></h3></article>')
+            '<h3><button class="vtitle" data-vid="' + v["vid"] + '" data-title="' + H.escape(v["title"]) + '" data-chname="' + H.escape(v["channel"]) + '" data-desc="' + H.escape(v["desc"]) + '">' + H.escape(v["title"]) + '</button></h3>' + share_row({"title": v["title"], "link": v["link"]}) + '</article>')
     vids_ld = {"@context": "https://schema.org", "@type": "ItemList", "name": "Pakistan News Videos",
                "itemListElement": [{"@type": "VideoObject", "position": i + 1, "name": v["title"],
                                     "description": v["desc"], "thumbnailUrl": v["thumb"],

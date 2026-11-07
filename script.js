@@ -86,3 +86,49 @@
       new Date().toLocaleString("en-GB", { timeZone: "Asia/Karachi", hour: "2-digit", minute: "2-digit", hour12: true }) + " PKT";
   });
 })();
+
+// Phase 4: dark-mode toggle (saved in localStorage; falls back to the system preference),
+// share buttons (copy link + native share), shown on every card.
+(function () {
+  var btn = document.getElementById("theme-toggle");
+  var root = document.documentElement;
+  function apply(t) {
+    root.setAttribute("data-theme", t);
+    if (btn) btn.textContent = t === "dark" ? "☀️" : "🌙";
+    try { localStorage.setItem("pfn-theme", t); } catch (e) {}
+  }
+  if (btn) {
+    btn.textContent = root.getAttribute("data-theme") === "dark" ? "☀️" : "🌙";
+    btn.addEventListener("click", function () {
+      apply(root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    });
+  }
+  if (navigator.share) {
+    document.querySelectorAll(".share-native").forEach(function (b) { b.style.display = "inline-block"; });
+  }
+  function fallbackCopy(t) {
+    var ta = document.createElement("textarea");
+    ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener("click", function (e) {
+    var c = e.target.closest(".share-copy");
+    if (c) {
+      var link = c.getAttribute("data-link"), done = function () {
+        var o = c.textContent;
+        c.textContent = root.lang === "ur" ? "کاپی ہو گیا ✓" : "Copied ✓";
+        setTimeout(function () { c.textContent = o; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(done, function () { fallbackCopy(link); done(); });
+      } else { fallbackCopy(link); done(); }
+      return;
+    }
+    var n = e.target.closest(".share-native");
+    if (n && navigator.share) {
+      navigator.share({ title: n.getAttribute("data-title") || document.title, url: n.getAttribute("data-link") }).catch(function () {});
+    }
+  });
+})();
