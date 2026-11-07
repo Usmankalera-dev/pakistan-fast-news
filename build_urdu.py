@@ -123,9 +123,18 @@ def rel(dt, now):
 
 def share_row(it):
     enc = urlquote(it["title"] + " " + it["link"])
+    fb = urlquote(it["link"])
     return (f'<div class="share"><a class="share-wa" href="https://wa.me/?text={enc}" target="_blank" rel="noopener">واٹس ایپ ↗</a>'
+            f'<a class="share-x" href="https://twitter.com/intent/tweet?text={enc}" target="_blank" rel="noopener">X ↗</a>'
+            f'<a class="share-fb" href="https://www.facebook.com/sharer/sharer.php?u={fb}" target="_blank" rel="noopener">Facebook ↗</a>'
             f'<button class="share-copy" type="button" data-link="{H.escape(it["link"])}">لنک کاپی کریں</button>'
             f'<button class="share-native" type="button" data-title="{H.escape(it["title"])}" data-link="{H.escape(it["link"])}">شیئر کریں</button></div>')
+
+
+def ticker(items, label):
+    seq = "".join(f'<a href="{H.escape(i["link"])}" target="_blank" rel="noopener">{H.escape(i["title"])}</a><span class="ticker-sep">•</span>' for i in items)
+    return (f'<div class="ticker"><span class="ticker-label">{H.escape(label)}</span>'
+            f'<div class="ticker-viewport"><div class="ticker-track">{seq}{seq}</div></div></div>')
 
 
 def card(it, now, big=False):
@@ -159,7 +168,7 @@ def nav(active=""):
     return "\n".join(out)
 
 
-def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
+def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker=""):
     now_s = datetime.now(PKT).strftime("%d %B %Y, %I:%M %p PKT")
     fsecs = "".join(f'<li><a href="{c}.html">{CAT_LABEL[c]}</a></li>' for c in CATS)
     footer_html = (
@@ -205,8 +214,8 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 <button id="theme-toggle" class="themetoggle" type="button" aria-label="ڈارک موڈ">🌙</button>
 </div></header>
 <nav class="mainnav" aria-label="شعبے"><div class="wrap">{nav(active)}</div></nav>
-<main class="wrap">
-<div class="today" id="today-widget" role="status"><span class="today-item"><b>$1</b> = <span id="w-usd">…</span></span><span class="today-item">🪙 سونا 1 تولہ ≈ <span id="w-gold">…</span></span><span class="today-item">🌤️ <span id="w-weather">…</span></span><span class="today-item">🕌 <span id="w-prayer">…</span></span><span class="today-src" id="w-updated"></span></div>
+{ticker}<main class="wrap">
+<div class="today" id="today-widget" role="status"><span class="today-item"><b>$1</b> = <span id="w-usd">…</span></span><span class="today-item">🪙 سونا 1 تولہ ≈ <span id="w-gold">…</span></span><span class="today-item">🌤️ <span id="w-weather">…</span></span><span class="today-item">🕌 <span id="w-prayer">…</span></span><span class="today-src" id="w-updated"></span><span class="today-forecast" id="w-forecast"></span></div>
 <h1>{H.escape(h1)}</h1>
 <div class="search"><input id="q" type="search" placeholder="خبریں تلاش کریں…" aria-label="خبریں تلاش کریں"></div>
 {body_html}
@@ -254,7 +263,7 @@ def main():
     (out_dir / "index.html").write_text(page(
         "پاکستان فاسٹ نیوز اردو — تازہ ترین پاکستانی خبریں",
         "پاکستان کی تیز ترین اردو خبریں — سیاست، کاروبار، کھیل، ٹیکنالوجی اور دنیا کی خبریں، ڈان اردو، اے آر وائی اردو، ایکسپریس اور بی بی سی اردو سے۔",
-        BASE + "/ur/", "پاکستان کی تازہ ترین خبریں", home_body, home_ld, "index.html"), encoding="utf-8")
+        BASE + "/ur/", "پاکستان کی تازہ ترین خبریں", home_body, home_ld, "index.html", ticker=ticker(items[:5], "تازہ ترین")), encoding="utf-8")
     for c in CATS:
         lst = by_cat[c][:30]
         ld = {"@context": "https://schema.org", "@type": "CollectionPage",

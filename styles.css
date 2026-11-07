@@ -143,3 +143,21 @@ html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}
 .share-copy,.share-native{background:var(--thumb-bg);border-color:var(--border);color:var(--fg)}
 .share-native{display:none}
 [data-theme="dark"] .srclogo{background:#fff;border-radius:4px;padding:2px 4px}
+
+/* Upgrades: breaking ticker + forecast row + X/Facebook share */
+.ticker{display:flex;align-items:stretch;background:#111;color:#fff;overflow:hidden}
+.ticker-label{flex:0 0 auto;background:#c8102e;color:#fff;font-weight:800;font-size:12.5px;letter-spacing:1px;padding:9px 12px;display:flex;align-items:center;z-index:1}
+.ticker-viewport{overflow:hidden;flex:1;display:flex;align-items:center}
+.ticker-track{display:inline-flex;white-space:nowrap;animation:tick 45s linear infinite;padding:9px 0}
+.ticker-track a{color:#fff;padding:0 18px;font-size:14.5px}
+.ticker-track a:hover{color:#ffd2d2}
+.ticker-sep{color:#ff3b30}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+html[dir="rtl"] .ticker-track{animation-name:tick-rtl}
+@keyframes tick-rtl{from{transform:translateX(0)}to{transform:translateX(50%)}}
+.share-x{background:#000;color:#fff}
+.share-fb{background:#1877f2;color:#fff}
+.share-x:hover,.share-fb:hover{text-decoration:none;filter:brightness(1.15)}
+.today-forecast{flex-basis:100%;font-size:13.5px;color:var(--muted)}
+#w-countdown{color:var(--muted);font-size:13.5px}
