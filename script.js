@@ -66,11 +66,42 @@
     return { d: d, dd: String(d.getDate()).padStart(2, "0"), mm: String(d.getMonth() + 1).padStart(2, "0"), yy: d.getFullYear() };
   }
   var pk = pktParts();
+  var cities = ["Lahore", "Karachi", "Islamabad"];
+  var prs = Promise.all(cities.map(function (c) {
+    return getJSON("https://api.aladhan.com/v1/timingsByCity/" + pk.dd + "-" + pk.mm + "-" + pk.yy + "?city=" + c + "&country=Pakistan&method=1").then(function (d) { return d && d.data ? d.data.timings : null; });
+  }));
+  var prayerCity = "Lahore";
+  try { prayerCity = localStorage.getItem("pfn-prayer-city") || "Lahore"; } catch (e) {}
+  var prayerData = {};
+  var prayerTimer = null;
+  function renderPrayer() {
+    var t = prayerData[prayerCity];
+    if (!t) { $("w-prayer").textContent = "—"; return; }
+    var keys = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+    var names = ur ? ["فجر", "ظہر", "عصر", "مغرب", "عشاء"] : keys;
+    prayerParts = keys.map(function (k, i) { return { k: k, n: names[i], m: toMin(t[k]), s: fmt12(t[k]) }; });
+    var nowMin = pktParts().d.getHours() * 60 + pktParts().d.getMinutes(), next = null;
+    for (var i = 0; i < prayerParts.length; i++) { if (prayerParts[i].m > nowMin) { next = prayerParts[i]; break; } }
+    if (!next) next = prayerParts[0];
+    $("w-prayer").innerHTML = '<div class="pnext">' + (ur ? "اگلی نماز" : "Next") + ': <b class="next">' + next.n + " " + next.s + '</b> <span id="w-countdown"></span></div>' +
+      '<div class="pgrid">' + prayerParts.map(function (x) { return '<span class="ptime" data-k="' + x.k + '">' + x.n + ' <b>' + x.s + '</b></span>'; }).join("") + '</div>';
+    document.querySelectorAll(".pcity").forEach(function (b) { b.classList.toggle("active", b.getAttribute("data-city") === prayerCity); });
+    prayerTick();
+    if (!prayerTimer) prayerTimer = setInterval(prayerTick, 30000);
+  }
+  var usdRate = null;
+  function convTick() {
+    var inp = document.getElementById("w-conv"), out = document.getElementById("w-conv-out");
+    if (!inp || !out) return;
+    var v = parseFloat(inp.value);
+    out.textContent = (usdRate && !isNaN(v) && v >= 0) ? fmt(v * usdRate) : "—";
+  }
+  var convInp = document.getElementById("w-conv");
+  if (convInp) convInp.addEventListener("input", convTick);
   function getJSON(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }).catch(function () { return null; }); }
   var usd = getJSON("https://open.er-api.com/v6/latest/USD").then(function (d) { return d && d.rates ? d.rates.PKR : null; });
   var gold = getJSON("https://api.gold-api.com/price/XAU").then(function (d) { return d && d.price ? d.price : null; });
   var wx = getJSON("https://api.open-meteo.com/v1/forecast?latitude=31.52,24.86,33.69&longitude=74.35,67.01,73.06&current=temperature_2m,weather_code&timezone=Asia%2FKarachi");
-  var pr = getJSON("https://api.aladhan.com/v1/timingsByCity/" + pk.dd + "-" + pk.mm + "-" + pk.yy + "?city=Lahore&country=Pakistan&method=1").then(function (d) { return d && d.data ? d.data.timings : null; });
   var fc = getJSON("https://api.open-meteo.com/v1/forecast?latitude=31.52&longitude=74.35&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FKarachi&forecast_days=7");
   var prayerParts = null;
   function prayerTick() {
@@ -85,9 +116,10 @@
     if (nb) nb.textContent = next.n + " " + next.s;
     document.querySelectorAll("#w-prayer .ptime").forEach(function (el) { el.classList.toggle("now", el.getAttribute("data-k") === next.k); });
   }
-  Promise.all([usd, gold, wx, pr, fc]).then(function (res) {
-    var pkr = res[0], g = res[1], wxx = res[2], t = res[3];
+  Promise.all([usd, gold, wx, prs, fc]).then(function (res) {
+    var pkr = res[0], g = res[1], wxx = res[2];
     $("w-usd").textContent = pkr ? fmt(pkr) : "—";
+    usdRate = pkr; convTick();
     if (pkr && g) {
       var g24 = Math.round(g / 31.1035 * 11.664 * pkr / 100) * 100;
       var g22 = Math.round(g24 * 22 / 24 / 100) * 100;
@@ -109,20 +141,21 @@
       });
       fel.innerHTML = rows.join("");
     }
-    if (t) {
-      var keys = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-      var names = ur ? ["فجر", "ظہر", "عصر", "مغرب", "عشاء"] : keys;
-      prayerParts = keys.map(function (k, i) { return { k: k, n: names[i], m: toMin(t[k]), s: fmt12(t[k]) }; });
-      var nowMin = pk.d.getHours() * 60 + pk.d.getMinutes(), next = null;
-      for (var i = 0; i < prayerParts.length; i++) { if (prayerParts[i].m > nowMin) { next = prayerParts[i]; break; } }
-      if (!next) next = prayerParts[0];
-      $("w-prayer").innerHTML = '<div class="pnext">' + (ur ? "اگلی نماز" : "Next") + ': <b class="next">' + next.n + " " + next.s + '</b> <span id="w-countdown"></span></div>' +
-        '<div class="pgrid">' + prayerParts.map(function (x) { return '<span class="ptime" data-k="' + x.k + '">' + x.n + ' <b>' + x.s + '</b></span>'; }).join("") + '</div>';
-      prayerTick(); setInterval(prayerTick, 30000);
-    } else { $("w-prayer").textContent = "—"; }
+    var prAll = res[3];
+    if (prAll) { cities.forEach(function (c, i) { if (prAll[i]) prayerData[c] = prAll[i]; }); }
+    if (Object.keys(prayerData).length) renderPrayer();
+    else $("w-prayer").textContent = "—";
     $("w-updated").textContent = (ur ? "تازہ ترین " : "Live ") +
       new Date().toLocaleString("en-GB", { timeZone: "Asia/Karachi", hour: "2-digit", minute: "2-digit", hour12: true }) + " PKT" +
       (ur ? " · ذرائع: exchangerate-api، gold-api، Open-Meteo، Aladhan" : " · Sources: exchangerate-api, gold-api, Open-Meteo, Aladhan");
+  });
+  document.addEventListener("click", function (e) {
+    var pc = e.target.closest(".pcity");
+    if (pc) {
+      prayerCity = pc.getAttribute("data-city");
+      try { localStorage.setItem("pfn-prayer-city", prayerCity); } catch (err) {}
+      renderPrayer();
+    }
   });
 })();
 
@@ -170,4 +203,29 @@
       navigator.share({ title: n.getAttribute("data-title") || document.title, url: n.getAttribute("data-link") }).catch(function () {});
     }
   });
+})();
+
+// Text size (A- / A+) + back-to-top button + PWA service-worker registration.
+(function () {
+  var FSS = [0.9, 1, 1.1, 1.2], fss = 1;
+  try { fss = parseFloat(localStorage.getItem("pfn-fss")) || 1; } catch (e) {}
+  if (FSS.indexOf(fss) < 0) fss = 1;
+  function applyFss() {
+    document.documentElement.style.setProperty("--fss", fss);
+    try { localStorage.setItem("pfn-fss", fss); } catch (e) {}
+  }
+  applyFss();
+  var minus = document.getElementById("fs-minus"), plus = document.getElementById("fs-plus");
+  if (minus) minus.addEventListener("click", function () { var i = FSS.indexOf(fss); if (i > 0) { fss = FSS[i - 1]; applyFss(); } });
+  if (plus) plus.addEventListener("click", function () { var i = FSS.indexOf(fss); if (i < FSS.length - 1) { fss = FSS[i + 1]; applyFss(); } });
+  var tt = document.getElementById("totop");
+  if (tt) {
+    window.addEventListener("scroll", function () { tt.classList.toggle("show", window.scrollY > 600); }, { passive: true });
+    tt.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+  }
+  if ("serviceWorker" in navigator && window.location.protocol === "https:") {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/pakistan-fast-news/sw.js").catch(function () {});
+    });
+  }
 })();
