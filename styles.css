@@ -152,7 +152,7 @@ html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}
 .topbar .clock{margin-inline-start:auto}
 .themetoggle{background:none;border:1px solid #666;color:#fff;border-radius:20px;padding:5px 11px;cursor:pointer;font-size:15px}
 .share{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.share-wa,.share-copy,.share-native{font-size:13px;font-weight:600;padding:6px 11px;border-radius:20px;cursor:pointer;text-decoration:none;border:1px solid transparent;font-family:inherit}
+.share-wa,.share-copy,.share-native,.share-x,.share-fb{font-size:13px;font-weight:600;padding:6px 11px;border-radius:20px;cursor:pointer;text-decoration:none;border:1px solid transparent;font-family:inherit}
 .share-wa{background:#25d366;color:#fff}
 .share-wa:hover{text-decoration:none;filter:brightness(.95)}
 .share-copy,.share-native{background:var(--thumb-bg);border-color:var(--border);color:var(--fg)}
