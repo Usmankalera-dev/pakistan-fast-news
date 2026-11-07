@@ -193,3 +193,42 @@ html[dir="rtl"] .ticker-track{animation-name:tick-rtl}
 .autoplay{display:flex;gap:6px;align-items:center;cursor:pointer}
 .nextbtn{background:#c8102e;color:#fff;border:0;border-radius:20px;padding:7px 14px;font-size:14px;font-weight:700;cursor:pointer}
 #upnext{color:var(--muted);font-size:13.5px}
+
+/* ---- Pretty layout: fonts, hero, cards, section headers, header, widget ---- */
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,h3,.logo,.mainnav a{font-family:Archivo,Inter,system-ui,-apple-system,sans-serif}
+.logo{font-weight:800}
+h1{font-weight:800;letter-spacing:-.8px}
+h2{font-weight:800;letter-spacing:-.4px;border-bottom:0;border-inline-start:4px solid #c8102e;padding-inline-start:12px;padding-bottom:2px}
+h2 .more{float:right;font-size:13.5px;font-weight:600;border:1px solid var(--border);border-radius:20px;padding:4px 12px;margin-top:1px}
+h2 .more:hover{background:#c8102e;border-color:#c8102e;color:#fff;text-decoration:none}
+h2.toplabel{display:inline-block;background:#c8102e;color:#fff;border:0;border-inline-start:0;padding:5px 14px;border-radius:6px;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;margin:18px 0 12px}
+.card{border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.card:hover{border-color:#c8102e;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.card h3{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.card h3 a:hover{text-decoration:none}
+.thumb{transition:transform .35s ease}
+.card:hover .thumb{transform:scale(1.04)}
+.card.hero{border:2px solid #c8102e;box-shadow:0 10px 28px rgba(200,16,46,.16)}
+.card.hero .thumbwrap{margin:-14px -16px 14px;border-radius:12px 12px 0 0;aspect-ratio:21/9}
+.card.hero h3{font-size:27px;line-height:1.25}
+.topbar{background:linear-gradient(180deg,#1c1c1c,#000);border-bottom:2px solid #c8102e}
+.mainnav{background:linear-gradient(90deg,#c8102e,#a50d26)}
+.mainnav a{font-weight:700}
+.search input{border-radius:12px;padding:12px 14px}
+.search input:focus{outline:2px solid #c8102e;outline-offset:1px;border-color:#c8102e}
+.today{background:linear-gradient(180deg,var(--soft),var(--card));box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.vcard{border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.vcard:hover{border-color:#c8102e;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.vthumb img{transition:transform .35s ease}
+.vcard:hover .vthumb img{transform:scale(1.04)}
+@media(max-width:640px){
+  .card.hero .thumbwrap{aspect-ratio:16/9}
+  .card.hero h3{font-size:21px}
+  h2 .more{padding:3px 10px}
+}
+/* Urdu: Nastaliq for headlines, Naskh for body text */
+html[dir="rtl"] body{font-family:"Noto Naskh Arabic","Noto Nastaliq Urdu",Tahoma,Arial,sans-serif}
+html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .logo,html[dir="rtl"] .mainnav a{font-family:"Noto Nastaliq Urdu","Noto Naskh Arabic",Tahoma,Arial,sans-serif}
+html[dir="rtl"] h2{line-height:2}
+html[dir="rtl"] h2.toplabel{line-height:1.9}
