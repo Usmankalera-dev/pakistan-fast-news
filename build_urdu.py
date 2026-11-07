@@ -196,6 +196,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html"):
 </div></header>
 <nav class="mainnav" aria-label="شعبے"><div class="wrap">{nav(active)}</div></nav>
 <main class="wrap">
+<div class="today" id="today-widget" role="status"><span class="today-item"><b>$1</b> = <span id="w-usd">…</span></span><span class="today-item">🪙 سونا 1 تولہ ≈ <span id="w-gold">…</span></span><span class="today-item">🌤️ <span id="w-weather">…</span></span><span class="today-item">🕌 <span id="w-prayer">…</span></span><span class="today-src" id="w-updated"></span></div>
 <h1>{H.escape(h1)}</h1>
 <div class="search"><input id="q" type="search" placeholder="خبریں تلاش کریں…" aria-label="خبریں تلاش کریں"></div>
 {body_html}
