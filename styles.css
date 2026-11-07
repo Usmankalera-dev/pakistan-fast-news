@@ -122,3 +122,6 @@ html[dir="rtl"] body{font-family:"Noto Nastaliq Urdu","Noto Naskh Arabic",Tahoma
 html[dir="rtl"] .card h3{line-height:2.1}
 html[dir="rtl"] .card p{line-height:2}
 html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}
+
+.thumbwrap.fallback{display:flex;align-items:center;justify-content:center;background:#f1f1f1}
+.thumbwrap.fallback img{height:52px;width:auto;max-width:75%}

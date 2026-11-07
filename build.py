@@ -341,14 +341,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidd
         '<h3 id="modaltitle"></h3><p id="modaldesc"></p>'
         '<p><a id="modalyt" href="#" target="_blank" rel="noopener">Watch on YouTube →</a></p></div></div>'
         '<script>' + videos_js + '</script>')
-    if videos:
+    if len(videos) >= 100:
         (out_dir / "videos.html").write_text(page(
             "Pakistan News Videos — Watch Geo, ARY, Dawn, Samaa & More",
             "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
             BASE + "/videos.html", "Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
     else:
-        # YouTube feeds failed this run — keep the last good videos.html instead of publishing an empty page.
-        print("WARNING: 0 videos fetched — keeping existing videos.html")
+        # Too few videos fetched (feeds degraded) — keep the last good videos.html instead of publishing a near-empty page.
+        print(f"WARNING: only {len(videos)} videos fetched — keeping existing videos.html")
 
     # ---- sitemap + robots + 404 ----
     urls = [("", "1.0"), ("videos.html", "0.9"), ("ur/", "0.9")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
