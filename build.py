@@ -21,6 +21,11 @@ FEEDS = [
     ("https://www.dawn.com/feeds/tech", "Dawn", "tech"),
     ("https://images.dawn.com/feeds/home", "Dawn Images", "entertainment"),
     ("https://arynews.tv/feed/", "ARY News", None),
+    ("https://feeds.bbci.co.uk/news/rss.xml", "BBC News", None),
+    ("https://feeds.bbci.co.uk/news/world/asia/rss.xml", "BBC News", None),
+    ("https://www.thenews.com.pk/rss/1/2", "The News", "world"),
+    ("https://www.thenews.com.pk/rss/1/3", "The News", "sports"),
+    ("https://www.thenews.com.pk/rss/1/4", "The News", "business"),
 ]
 CATS = ["pakistan", "world", "business", "sports", "tech", "entertainment"]
 YT_CHANNELS = [
@@ -38,8 +43,11 @@ YT_CHANNELS = [
 ]
 CAT_LABEL = {"pakistan": "Pakistan", "world": "World", "business": "Business",
              "sports": "Sports", "tech": "Tech", "entertainment": "Entertainment"}
+CAT_EMOJI = {"pakistan": "🇵🇰", "world": "🌍", "business": "💼",
+             "sports": "🏏", "tech": "💻", "entertainment": "🎬"}
 LOGOS = {"Dawn": ("logo-dawn.png", 84, 20), "ARY News": ("logo-ary.svg", 22, 24),
-         "Dawn Images": ("logo-dawn.png", 84, 20)}
+         "Dawn Images": ("logo-dawn.png", 84, 20),
+         "BBC News": ("logo-bbc.gif", 40, 20), "The News": ("logo-thenews.svg", 63, 20)}
 NS = {"media": "http://search.yahoo.com/mrss/"}
 KW = {
     "sports": ["cricket", "football", "hockey", "psl", "match", "tournament", "athlete", "olympic", "fifa", "tennis", "badminton", "squash", "snooker", "world cup", "t20", "odi", "test match", "batsman", "bowler", "pcb", "fifa", "champions trophy"],
@@ -79,6 +87,8 @@ def fetch():
         for it in root.iter("item"):
             title = clean(it.findtext("title"))
             link = (it.findtext("link") or "").strip()
+            if "bbc.co.uk" in link or "bbc.com" in link:
+                link = link.split("?")[0]  # drop BBC's RSS tracking params
             if not title or not link:
                 continue
             key = " ".join(re.sub(r"[^a-z0-9 ]", "", title.lower()).split()[:7])
@@ -96,13 +106,18 @@ def fetch():
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
             dt = dt.astimezone(PKT)
-            desc = clean(it.findtext("description"))[:400]
+            raw_desc = it.findtext("description") or ""
+            desc = clean(raw_desc)[:400]
             img = None
             mc = it.find("media:content", NS)
             if mc is None:
                 mc = it.find("media:thumbnail", NS)
             if mc is not None:
                 img = mc.get("url")
+            if not img:  # The News embeds its photo inside the description HTML
+                m = re.search(r'<img[^>]+src="([^"]+)"', raw_desc)
+                if m:
+                    img = m.group(1)
             items.append({"title": title, "link": link, "dt": dt, "desc": desc,
                           "source": source, "cat": categorize(title, desc, feed_cat), "img": img})
     items.sort(key=lambda x: x["dt"], reverse=True)
@@ -168,23 +183,56 @@ def ticker(items, label):
 
 
 def card(it, now, big=False):
-    cls = "card hero" if big else "card"
     logo, lw, lh = LOGOS.get(it["source"], ("logo-dawn.png", 84, 20))
-    thumb = ""
-    if it.get("img"):
-        thumb = (f"<a class=\"thumbwrap\" href=\"{H.escape(it['link'])}\" target=\"_blank\" rel=\"noopener\" tabindex=\"-1\" aria-hidden=\"true\">"
-                 f"<img class=\"thumb\" src=\"{H.escape(it['img'])}\" alt=\"\" loading=\"lazy\" onerror=\"this.closest('.thumbwrap').remove()\"></a>")
-    return (f'<article class="{cls}">{thumb}<div class="meta">'
+    link = H.escape(it["link"])
+    meta = (f'<div class="meta">'
             f'<img class="srclogo" src="{logo}" alt="{H.escape(it["source"])} logo" width="{lw}" height="{lh}" loading="lazy">'
             f'<span class="src">{H.escape(it["source"])}</span>'
             f'<span class="chip {it["cat"]}">{CAT_LABEL[it["cat"]]}</span>'
-            f'<time datetime="{it["dt"].isoformat()}">{rel(it["dt"], now)} · {it["dt"].strftime("%d %b %Y, %I:%M %p")} PKT</time></div>'
-            f'<h3><a href="{H.escape(it["link"])}" target="_blank" rel="noopener">{H.escape(it["title"])}</a></h3>'
-            + (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "")
-            + f'<a class="readmore" href="{H.escape(it["link"])}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a>' + share_row(it) + '</article>')
+            f'<time datetime="{it["dt"].isoformat()}">{rel(it["dt"], now)} · {it["dt"].strftime("%d %b %Y, %I:%M %p")} PKT</time></div>')
+    title = f'<h3><a href="{link}" target="_blank" rel="noopener">{H.escape(it["title"])}</a></h3>'
+    desc = (f'<p>{H.escape(it["desc"])}</p>' if it["desc"] else "")
+    readmore = f'<a class="readmore" href="{link}" target="_blank" rel="noopener">Read full story at {H.escape(it["source"])} →</a>'
+    if big and it.get("img"):
+        return (f'<article class="card hero heroimg cat-{it["cat"]}">'
+                f'<div class="herowrap"><a class="heropic" href="{link}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">'
+                f'<img src="{H.escape(it["img"])}" alt="" loading="eager" onerror="this.closest(\'.herowrap\').classList.add(\'imgfail\');this.closest(\'article\').classList.add(\'hero-noimg\')"></a>'
+                f'<span class="herograd"></span>'
+                f'<div class="heroover">{title}</div></div>'
+                f'<div class="herobody">{meta}{desc}{readmore}' + share_row(it) + '</div></article>')
+    thumb = ""
+    if it.get("img"):
+        thumb = (f"<a class=\"thumbwrap\" href=\"{link}\" target=\"_blank\" rel=\"noopener\" tabindex=\"-1\" aria-hidden=\"true\">"
+                 f"<img class=\"thumb\" src=\"{H.escape(it['img'])}\" alt=\"\" loading=\"lazy\" onerror=\"this.closest('.thumbwrap').remove()\"></a>")
+    cls = "card hero" if big else "card"
+    return (f'<article class="{cls} cat-{it["cat"]}">{thumb}{meta}{title}{desc}{readmore}' + share_row(it) + '</article>')
+
+def load_editorial(lang):
+    """Original news written by Usman, newest first. File: editorial.json (repo root)."""
+    try:
+        data = json.loads((Path(__file__).parent / "editorial.json").read_text(encoding="utf-8"))
+        items = [i for i in data.get("items", []) if i.get("lang", "en") == lang]
+    except Exception:
+        items = []
+    items.sort(key=lambda i: i.get("date", ""), reverse=True)
+    return items
+
+
+def ed_card(it, now, idx, base_url):
+    """One original-news card. Share links point at the editorial page anchor."""
+    dt = datetime.fromisoformat(it["date"]).replace(tzinfo=PKT, hour=12, minute=0)
+    link = f"{base_url}#ed-{idx}"
+    meta = (f'<div class="meta">'
+            f'<span class="src">✍️ Usman Kalera</span>'
+            f'<span class="chip {it.get("cat", "pakistan")}">{CAT_LABEL[it.get("cat", "pakistan")]}</span>'
+            f'<time datetime="{it["date"]}">{rel(dt, now)} · {dt.strftime("%d %b %Y")} PKT</time></div>')
+    return (f'<article class="card cat-{it.get("cat", "pakistan")}" id="ed-{idx}">{meta}'
+            f'<h3>{H.escape(it["title"])}</h3>'
+            f'<p>{H.escape(it["body"])}</p>' + share_row({"title": it["title"], "link": link}) + '</article>')
+
 
 def nav(active=""):
-    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("videos.html", "Videos"), ("ur/index.html", "اردو")]
+    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("editorial.html", "✍️ Exclusive"), ("videos.html", "Videos"), ("ur/index.html", "اردو")]
     out = []
     for href, label in links:
         cls = ' class="active"' if href == active else ""
@@ -197,6 +245,7 @@ def nav(active=""):
 def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker=""):
     now_s = datetime.now(PKT).strftime("%d %B %Y, %I:%M %p PKT")
     fsecs = "".join(f'<li><a href="{c}.html">{CAT_LABEL[c]}</a></li>' for c in CATS)
+    fsecs += '<li><a href="editorial.html">✍️ Exclusive</a></li>'
     fsecs += '<li><a href="videos.html">▶ Videos</a></li>'
     fchans = "".join(
         f'<li><a class="fchan" href="videos.html#{slug}"><img src="yt-{slug}.jpg" alt="" width="22" height="22" loading="lazy">{name}</a></li>'
@@ -211,6 +260,8 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
         '<div class="fcol fsources"><h4>Sources</h4><p>Headlines from:</p>'
         '<span class="srclogochip"><img src="logo-dawn.png" alt="Dawn logo" height="22"></span>'
         '<span class="srclogochip"><img src="logo-ary.svg" alt="ARY News logo" height="28"></span>'
+        '<span class="srclogochip"><img src="logo-bbc.gif" alt="BBC News logo" height="22"></span>'
+        '<span class="srclogochip"><img src="logo-thenews.svg" alt="The News logo" height="22"></span>'
         '<p class="fine">Full stories open on the publishers\u2019 sites — we never copy full articles. Videos play from the channels\u2019 official YouTube channels.</p></div>'
         '</div><div class="fbot"><span>© 2026 Pakistan Fast News</span>'
         '<span>Updated ' + now_s + ' · <a href="sitemap.xml">Sitemap</a></span></div></div></footer>')
@@ -219,7 +270,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>try{{var t=localStorage.getItem("pfn-theme");if(t){{document.documentElement.setAttribute("data-theme",t)}}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){{document.documentElement.setAttribute("data-theme","dark")}}}}catch(e){{}}</script>
+<script>try{{var f=localStorage.getItem("pfn-fss");if(f)document.documentElement.style.setProperty("--fss",f);var t=localStorage.getItem("pfn-theme");if(t){{document.documentElement.setAttribute("data-theme",t)}}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){{document.documentElement.setAttribute("data-theme","dark")}}}}catch(e){{}}</script>
 <title>{H.escape(title)}</title>
 <meta name="description" content="{H.escape(desc)}">
 <link rel="canonical" href="{canon}">
@@ -232,7 +283,16 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <meta name="twitter:title" content="{H.escape(title)}">
 <meta name="twitter:description" content="{H.escape(desc)}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20261107r3">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -240,23 +300,25 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <a class="logo" href="index.html"><img src="favicon.svg" alt="Pakistan Fast News logo" width="36" height="36" class="sitelogo"><span class="logotext">Pakistan <b>Fast News</b><small>Pakistan's fastest headlines</small></span></a>
 <div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">Updated {now_s}</span></div>
 <button id="theme-toggle" class="themetoggle" type="button" aria-label="Dark mode">🌙</button>
+<span class="fss"><button id="fs-minus" class="fsbtn" type="button" aria-label="Smaller text">A−</button><button id="fs-plus" class="fsbtn" type="button" aria-label="Larger text">A+</button></span>
 </div></header>
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
 {ticker}<main class="wrap">
 <div class="today" id="today-widget" role="status">
-<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span></span></div>
+<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="US dollars"> USD = <b id="w-conv-out">…</b></span></span></div>
 <div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
 <div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
-<div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval" id="w-prayer">…</span></div>
+<div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span id="w-prayer">…</span></span></div>
 <div class="trow"><span class="tlabel">📅 Lahore · 7 days</span><span class="tval"><span class="fgrid" id="w-forecast"></span></span></div>
 <div class="tsrc" id="w-updated"></div>
 </div>
 <h1>{H.escape(h1)}</h1>
-<div class="search"><input id="q" type="search" placeholder="Search headlines…" aria-label="Search headlines"></div>
+<div class="search"><span class="searchicon" aria-hidden="true">🔍</span><input id="q" type="search" placeholder="Search headlines…" aria-label="Search headlines"></div>
 {body_html}
 </main>
 {footer_html}
 <script src="script.js" defer></script>
+<button id="totop" class="totop" type="button" aria-label="Back to top">↑</button>
 </body>
 </html>
 """
@@ -276,15 +338,19 @@ def main():
     # ---- Home ----
     hero = items[0]
     rest = items[1:19]
+    ed_items = load_editorial("en")
+    ed_cards = [ed_card(it, now, i, BASE + "/editorial.html") for i, it in enumerate(ed_items)]
+    ed_section = ('<section><h2>✍️ Exclusive <span class="h2note">· written by Usman Kalera</span> <a class="more" href="editorial.html">All →</a></h2><div class="grid">' + "".join(ed_cards[:4]) + '</div></section>' if ed_cards else
+                  '<section><h2>✍️ Exclusive <span class="h2note">· written by Usman Kalera</span></h2><p>Our own newsroom is getting ready — the first story is coming soon.</p></section>')
     sections = ""
     for c in CATS:
         lst = by_cat[c][:4]
         if len(lst) < 2:
             continue
-        sections += f'<section><h2>{CAT_LABEL[c]} <a class="more" href="{c}.html">More →</a></h2><div class="grid">{"".join(card(i, now) for i in lst)}</div></section>'
-    home_body = (f'<section><h2>Top story</h2>{card(hero, now, big=True)}</section>'
+        sections += f'<section><h2>{CAT_EMOJI[c]} {CAT_LABEL[c]} <span class="h2note">· newest {rel(max(i["dt"] for i in lst), now)}</span> <a class="more" href="{c}.html">More →</a></h2><div class="grid">{"".join(card(i, now) for i in lst)}</div></section>'
+    home_body = (f'<section><h2 class="toplabel">Top story</h2>{card(hero, now, big=True)}</section>'
                  f'<section><h2>Latest headlines</h2><div class="grid" id="latest">{"".join(card(i, now) for i in rest)}</div></section>'
-                 + sections)
+                 + ed_section + sections)
     hero_ld = {"@context": "https://schema.org", "@type": "NewsArticle",
                "headline": hero["title"], "datePublished": hero["dt"].isoformat(),
                "dateModified": hero["dt"].isoformat(), "author": {"@type": "Organization", "name": hero["source"]},
@@ -294,8 +360,22 @@ def main():
     home_ld = json.dumps([site_ld, org_ld, hero_ld], ensure_ascii=False)
     (out_dir / "index.html").write_text(page(
         "Pakistan Fast News — Latest Pakistan News, Fast",
-        "The fastest Pakistan news headlines — politics, business, sports, tech and world news, updated around the clock from Dawn and ARY News.",
-        BASE + "/", "Latest headlines from Pakistan", home_body, home_ld, "index.html", ticker=ticker(items[:5], "BREAKING")), encoding="utf-8")
+        "The fastest Pakistan news headlines — politics, business, sports, tech and world news, updated around the clock from Dawn, ARY News, BBC News and The News.",
+        BASE + "/", "📰 Latest headlines from Pakistan", home_body, home_ld, "index.html", ticker=ticker(items[:5], "BREAKING")), encoding="utf-8")
+
+    # ---- Editorial page (original news) ----
+    ed_ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Exclusive — Original News by Usman Kalera",
+             "url": f"{BASE}/editorial.html",
+             "hasPart": [{"@type": "NewsArticle", "headline": i["title"], "datePublished": i["date"],
+                          "author": {"@type": "Person", "name": "Usman Kalera"}, "url": f"{BASE}/editorial.html#ed-{n}"} for n, i in enumerate(ed_items[:10])]}
+    ed_body = ('<p class="crumb"><a href="index.html">Home</a> / Exclusive</p>'
+               '<p class="secupd">Original news written by Usman Kalera for Pakistan Fast News — fresh stories every day.</p>'
+               '<div class="grid">' + "".join(ed_cards) + '</div>' if ed_cards else
+               '<p class="crumb"><a href="index.html">Home</a> / Exclusive</p><p>Our own newsroom is getting ready — the first story is coming soon.</p>')
+    (out_dir / "editorial.html").write_text(page(
+        "Exclusive — Original News by Usman Kalera | Pakistan Fast News",
+        "Original news written by Usman Kalera for Pakistan Fast News — fresh stories every day, alongside headlines from Dawn, ARY News, BBC News and The News.",
+        f"{BASE}/editorial.html", "✍️ Exclusive", ed_body, json.dumps(ed_ld, ensure_ascii=False), "editorial.html"), encoding="utf-8")
 
     # ---- Category pages ----
     for c in CATS:
@@ -304,16 +384,27 @@ def main():
               "url": f"{BASE}/{c}.html",
               "hasPart": [{"@type": "NewsArticle", "headline": i["title"], "datePublished": i["dt"].isoformat(), "url": i["link"]} for i in lst[:10]]}
         body = (f'<p class="crumb"><a href="index.html">Home</a> / {CAT_LABEL[c]}</p>'
+                f'<p class="secupd">Updated {now.strftime("%d %B %Y, %I:%M %p PKT")} · Newest story {rel(max(i["dt"] for i in lst), now)}</p>'
                 f'<div class="grid">{"".join(card(i, now) for i in lst)}</div>' if lst else
                 '<p>No stories in this section yet — check back soon.</p>')
         (out_dir / f"{c}.html").write_text(page(
             f"{CAT_LABEL[c]} News — Pakistan Fast News",
             f"Latest {CAT_LABEL[c].lower()} news from Pakistan and the world, updated fast. Headlines from Dawn and ARY News.",
-            f"{BASE}/{c}.html", f"{CAT_LABEL[c]} news", body, json.dumps(ld, ensure_ascii=False), f"{c}.html"), encoding="utf-8")
+            f"{BASE}/{c}.html", f"{CAT_EMOJI[c]} {CAT_LABEL[c]} news", body, json.dumps(ld, ensure_ascii=False), f"{c}.html"), encoding="utf-8")
 
     # ---- Videos page ----
     videos = fetch_videos()
     print("videos:", len(videos), "| by channel:", {n: sum(1 for v in videos if v["channel"] == n) for n, _, _ in YT_CHANNELS})
+    cache_file = out_dir / "videos_cache.json"
+    if len(videos) >= 100:
+        cache_file.write_text(json.dumps([{**v, "dt": v["dt"].isoformat()} for v in videos], ensure_ascii=False), encoding="utf-8")
+    else:
+        try:
+            cached = json.loads(cache_file.read_text(encoding="utf-8"))
+            videos = [{**v, "dt": datetime.fromisoformat(v["dt"])} for v in cached]
+            print(f"videos: using cache ({len(videos)} videos)")
+        except Exception as e:
+            print("videos cache miss:", e)
     chan_btns = ['<button class="chan active" data-ch="all"><span class="chanlogo all">ALL</span><span>All Channels</span></button>']
     for name, cid, slug in YT_CHANNELS:
         chan_btns.append(
@@ -345,10 +436,22 @@ document.querySelectorAll('.chan').forEach(function(b){b.addEventListener('click
 document.getElementById('vq').addEventListener('input',show);show();
 var h=location.hash.slice(1);if(h){var hb=document.querySelector('.chan[data-ch="'+h+'"]');if(hb)hb.click();}
 var modal=document.getElementById('modal'),player=document.getElementById('player');
-function openVid(vid,title,chname,desc){document.getElementById('modaltitle').textContent=title;
+var curVid=null,ytPlayer=null,autoNext=false;
+try{autoNext=localStorage.getItem('pfn-autoplay')==='1';}catch(e){}
+document.getElementById('autoplay-next').checked=autoNext;
+document.getElementById('autoplay-next').addEventListener('change',function(){autoNext=this.checked;try{localStorage.setItem('pfn-autoplay',autoNext?'1':'0');}catch(e){}});
+function visibleCards(){return cards.filter(function(c){return c.style.display!=='none';});}
+function vidOf(c){return c.querySelector('[data-vid]').dataset.vid;}
+function upNextLabel(){var v=visibleCards(),i=v.findIndex(function(c){return vidOf(c)===curVid;}),n=v[(i+1)%v.length];document.getElementById('upnext').textContent=n?('Up next: '+n.querySelector('.vtitle').textContent):'';}
+function playNext(){var v=visibleCards();if(!v.length)return;var i=v.findIndex(function(c){return vidOf(c)===curVid;}),n=v[(i+1)%v.length],b=n.querySelector('[data-vid]');openVid(b.dataset.vid,b.dataset.title,b.dataset.chname,b.dataset.desc);}
+document.getElementById('nextvid').addEventListener('click',playNext);
+function initYT(){if(ytPlayer||!window.YT||!YT.Player)return;try{ytPlayer=new YT.Player(player,{events:{onStateChange:function(e){if(e.data===YT.PlayerState.ENDED&&autoNext)playNext();}}});}catch(e){}}
+window.onYouTubeIframeAPIReady=function(){initYT();};
+if(!window.YT){var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);}
+function openVid(vid,title,chname,desc){curVid=vid;document.getElementById('modaltitle').textContent=title;
 document.getElementById('modaldesc').textContent=desc||'';var a=document.getElementById('modalyt');a.href='https://www.youtube.com/watch?v='+vid;a.textContent='Watch on YouTube ('+chname+') →';
-player.src='https://www.youtube-nocookie.com/embed/'+vid+'?autoplay=1&rel=0';modal.hidden=false;document.body.style.overflow='hidden';}
-function closeVid(){player.src='';modal.hidden=true;document.body.style.overflow='';}
+player.src='https://www.youtube-nocookie.com/embed/'+vid+'?autoplay=1&rel=0&enablejsapi=1';modal.hidden=false;document.body.style.overflow='hidden';upNextLabel();initYT();}
+function closeVid(){curVid=null;player.src='';modal.hidden=true;document.body.style.overflow='';}
 grid.addEventListener('click',function(e){var b=e.target.closest('[data-vid]');if(b)openVid(b.dataset.vid,b.dataset.title,b.dataset.chname,b.dataset.desc);});
 document.getElementById('modalclose').addEventListener('click',closeVid);
 modal.addEventListener('click',function(e){if(e.target===modal)closeVid();});
@@ -359,26 +462,23 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidd
         '<p class="crumb"><a href="index.html">Home</a> / Videos</p>'
         '<p class="vintro">Latest videos from Pakistan\u2019s top news channels. Tap a channel logo to see only its videos, then tap any video to play it right here on this site.</p>'
         '<div class="chanbar" role="group" aria-label="News channels">' + ''.join(chan_btns) + '</div>'
-        '<div class="search"><input id="vq" type="search" placeholder="Search videos\u2026" aria-label="Search videos"></div>'
+        '<div class="search"><span class="searchicon" aria-hidden="true">🔍</span><input id="vq" type="search" placeholder="Search videos\u2026" aria-label="Search videos"></div>'
         '<div class="vgrid" id="vgrid">' + ''.join(vcards) + '</div>'
         '<p class="vcount" id="vcount"></p>'
         '<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Video player" hidden>'
         '<div class="modalbox"><button class="modalclose" id="modalclose" aria-label="Close player">✕</button>'
         '<div class="playerwrap"><iframe id="player" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
         '<h3 id="modaltitle"></h3><p id="modaldesc"></p>'
+        '<div class="playctl"><label class="autoplay"><input type="checkbox" id="autoplay-next"> Autoplay next</label><button id="nextvid" class="nextbtn" type="button">Next ▶</button><span id="upnext"></span></div>'
         '<p><a id="modalyt" href="#" target="_blank" rel="noopener">Watch on YouTube →</a></p></div></div>'
         '<script>' + videos_js + '</script>')
-    if len(videos) >= 100:
-        (out_dir / "videos.html").write_text(page(
+    (out_dir / "videos.html").write_text(page(
             "Pakistan News Videos — Watch Geo, ARY, Dawn, Samaa & More",
             "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
-            BASE + "/videos.html", "Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
-    else:
-        # Too few videos fetched (feeds degraded) — keep the last good videos.html instead of publishing a near-empty page.
-        print(f"WARNING: only {len(videos)} videos fetched — keeping existing videos.html")
+            BASE + "/videos.html", "🎬 Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
 
     # ---- sitemap + robots + 404 ----
-    urls = [("", "1.0"), ("videos.html", "0.9"), ("ur/", "0.9")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
+    urls = [("", "1.0"), ("editorial.html", "0.9"), ("videos.html", "0.9"), ("ur/", "0.9"), ("ur/editorial.html", "0.8")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, pr in urls:
         sm.append(f"<url><loc>{BASE}/{u}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>")
