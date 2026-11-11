@@ -146,7 +146,7 @@ html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}
 .fday i{display:block;font-style:normal;color:var(--muted);font-size:12.5px}
 .fday b{display:block;font-size:14.5px}
 .tsrc{font-size:12.5px;color:var(--faint);padding-top:9px}
-@media(max-width:640px){.tlabel{flex-basis:88px;font-size:13px}.trow{padding:9px 0}}
+@media(max-width:640px){.tlabel{flex-basis:88px;font-size:13px}.trow{padding:9px 0}.trow-fx{flex-direction:column;gap:4px}.trow-fx .tlabel{flex-basis:auto;padding-top:0}.fxchip{font-size:12.5px;padding:3px 9px}}
 
 /* Phase 4: theme toggle + share buttons */
 .topbar .clock{margin-inline-start:auto}
@@ -283,7 +283,7 @@ html[dir="rtl"] .card.hero.heroimg .heroover h3{line-height:1.9}
 /* ---- Upgrade round 2026-11-11: Hijri/FX widget, Suno, Live TV, prayer, cricket, newsletter, comments ---- */
 /* Widget: FX chips + converter currency select */
 .fxchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.fxchip{background:var(--thumb-bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}
+.fxchip{background:var(--thumb-bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
 #w-cur{font:inherit;font-size:13.5px;padding:6px 8px;border:1px solid var(--input-border);border-radius:8px;background:var(--card);color:var(--fg)}
 /* Suno listen button */
 .suno-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:inherit;font-size:13.5px;font-weight:700;padding:7px 13px;border-radius:20px;border:1px solid #0b7a3e;background:transparent;color:#0b7a3e;cursor:pointer}
@@ -323,6 +323,8 @@ html[dir="rtl"] .card.hero.heroimg .heroover h3{line-height:1.9}
 .cteams{font-size:17px;margin:0 0 4px}
 .cstatus{color:var(--muted);font-size:14px;margin:0 0 8px}
 .clink a{font-weight:700;font-size:14px}
+.cstrip .fine a{white-space:nowrap}
+.cRetry{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:2px;color:var(--fg)}
 .cloading{color:var(--muted)}
 /* Newsletter */
 .newsbox{border:1px solid var(--border);border-radius:14px;padding:18px;background:linear-gradient(180deg,var(--soft),var(--card));margin:22px 0}

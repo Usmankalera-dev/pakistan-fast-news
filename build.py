@@ -317,7 +317,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261111r1">
+<link rel="stylesheet" href="styles.css?v=20261111r2">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -331,7 +331,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {ticker}<main class="wrap">
 <div class="today" id="today-widget" role="status">
 <div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="Amount"> <select id="w-cur" aria-label="Currency"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option></select> = <b id="w-conv-out">…</b></span></span></div>
-<div class="trow"><span class="tlabel">💱 Currencies</span><span class="tval" id="w-fx">…</span></div>
+<div class="trow trow-fx"><span class="tlabel">💱 Currencies</span><span class="tval" id="w-fx">…</span></div>
 <div class="trow"><span class="tlabel">🌙 Hijri date</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
 <div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
@@ -344,7 +344,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="script.js" defer></script>
+<script src="script.js?v=20261111r2" defer></script>
 <button id="totop" class="totop" type="button" aria-label="Back to top">↑</button>
 </body>
 </html>
@@ -383,7 +383,7 @@ def main():
         sections += f'<section><h2>{CAT_EMOJI[c]} {CAT_LABEL[c]} <span class="h2note">· newest {rel(max(i["dt"] for i in lst), now)}</span> <a class="more" href="{c}.html">More →</a></h2><div class="grid">{"".join(card(i, now) for i in lst)}</div></section>'
     cricket_strip = ('<section class="cstrip" id="cricket-strip" data-lang="en"><h2>🏏 Cricket live score</h2>'
                      '<div class="cbody"><p class="cloading">Loading live score…</p></div>'
-                     '<p class="fine">Live scores: <a href="https://sportscore.com/cricket" target="_blank" rel="noopener">Powered by SportScore</a></p></section>')
+                     '<p class="fine" id="cricket-src">Live scores: <a href="https://sportscore.com/cricket" target="_blank" rel="noopener">Powered by SportScore</a></p></section>')
     home_body = (f'<section><h2 class="toplabel">Top story</h2>{card(hero, now, big=True)}</section>'
                  + cricket_strip +
                  f'<section><h2>Latest headlines</h2><div class="grid" id="latest">{"".join(card(i, now) for i in rest)}</div></section>'

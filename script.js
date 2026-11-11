@@ -323,26 +323,74 @@
     body.innerHTML = '<p class="cstatus">' + (isUr ? 'اس وقت کوئی لائیو میچ نہیں ہے۔' : 'No live match right now.') + '</p>'
       + link("/cricket", isUr ? 'لائیو اسکور دیکھیں ↗' : 'See live scores ↗');
   }
+  // Last good score is cached on this device, so a failed request shows the
+  // previous score with its time instead of a bare error. A Retry button lets
+  // the reader try again at once (some mobile networks rate-limit the free
+  // API on shared IPs, so the first attempt can fail while a retry works).
+  var CACHE_KEY = "pfn-cricket-v1";
+  function fmtTimePKT(ts) {
+    try {
+      return new Date(ts).toLocaleTimeString(isUr ? "ur-PK" : "en-GB", { timeZone: "Asia/Karachi", hour: "numeric", minute: "2-digit" });
+    } catch (e) { return ""; }
+  }
+  function saveCache(m, state) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ m: m, state: state, ts: Date.now() })); } catch (e) {}
+  }
+  function readCache() {
+    try {
+      var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+      return (c && c.m && c.ts) ? c : null;
+    } catch (e) { return null; }
+  }
+  function renderCached() {
+    var c = readCache();
+    if (!c) return false;
+    renderMatch(c.m, c.state);
+    var note = (isUr ? "آخری اپڈیٹ " : "Last updated ") + fmtTimePKT(c.ts) + " PKT";
+    body.insertAdjacentHTML("beforeend", '<p class="cstatus">' + esc(note) + '</p>'
+      + '<button class="cRetry" type="button">' + (isUr ? "↻ دوبارہ کوشش کریں" : "↻ Retry") + '</button>');
+    var btn = body.querySelector(".cRetry");
+    if (btn) btn.addEventListener("click", function () { body.innerHTML = '<p class="cloading">' + (isUr ? "لائیو اسکور لوڈ ہو رہا ہے…" : "Loading live score…") + '</p>'; load(); });
+    return true;
+  }
+  function renderError() {
+    if (renderCached()) return;
+    body.innerHTML = '<p class="cstatus">' + (isUr ? "اسکور ابھی دستیاب نہیں ہے — براہ کرم دوبارہ کوشش کریں۔" : "Score unavailable right now — please try again.") + '</p>'
+      + '<button class="cRetry" type="button">' + (isUr ? "↻ دوبارہ کوشش کریں" : "↻ Retry") + '</button><br>'
+      + link("/cricket", isUr ? "لائیو اسکور دیکھیں ↗" : "See live scores ↗");
+    var btn = body.querySelector(".cRetry");
+    if (btn) btn.addEventListener("click", function () { body.innerHTML = '<p class="cloading">' + (isUr ? "لائیو اسکور لوڈ ہو رہا ہے…" : "Loading live score…") + '</p>'; load(); });
+  }
+  function fetchJson(url, ms) {
+    var ctrl = ("AbortController" in window) ? new AbortController() : null;
+    var timer = null;
+    if (ctrl) timer = setTimeout(function () { ctrl.abort(); }, ms || 10000);
+    return fetch(url, ctrl ? { signal: ctrl.signal } : {})
+      .then(function (r) { if (timer) clearTimeout(timer); if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+      .catch(function (e) { if (timer) clearTimeout(timer); throw e; });
+  }
+  function pick(list) {
+    var live = list.filter(function (m) { return m.status === "live"; });
+    live.sort(function (a, b) {
+      if (hasScore(b) !== hasScore(a)) return (hasScore(b) ? 1 : 0) - (hasScore(a) ? 1 : 0);
+      return (isPak(b) ? 1 : 0) - (isPak(a) ? 1 : 0);
+    });
+    if (live.length) return { m: live[0], state: "live" };
+    var fin = list.filter(function (m) { return m.status === "finished"; });
+    fin.sort(function (a, b) { return new Date(b.time) - new Date(a.time); });
+    if (fin.length) return { m: fin[0], state: "finished" };
+    return null;
+  }
   function load() {
-    fetch("https://sportscore.com/api/v1/matches/?sport=cricket&status=live")
-      .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+    fetchJson("https://sportscore.com/api/v1/matches/?sport=cricket&status=live")
+      .catch(function () { return fetchJson("https://sportscore.com/api/v1/matches/?sport=cricket"); })
       .then(function (d) {
-        var list = (d && d.matches) || [];
-        var live = list.filter(function (m) { return m.status === "live"; });
-        live.sort(function (a, b) {
-          if (hasScore(b) !== hasScore(a)) return (hasScore(b) ? 1 : 0) - (hasScore(a) ? 1 : 0);
-          return (isPak(b) ? 1 : 0) - (isPak(a) ? 1 : 0);
-        });
-        if (live.length) { renderMatch(live[0], "live"); return; }
-        var fin = list.filter(function (m) { return m.status === "finished"; });
-        fin.sort(function (a, b) { return new Date(b.time) - new Date(a.time); });
-        if (fin.length) { renderMatch(fin[0], "finished"); return; }
-        renderEmpty();
+        var picked = pick((d && d.matches) || []);
+        if (!picked) { renderEmpty(); return; }
+        renderMatch(picked.m, picked.state);
+        saveCache(picked.m, picked.state);
       })
-      .catch(function () {
-        body.innerHTML = '<p class="cstatus">' + (isUr ? 'اسکور ابھی دستیاب نہیں ہے — براہ کرم دوبارہ کوشش کریں۔' : 'Score unavailable right now — please try again.') + '</p>'
-          + link("/cricket", isUr ? 'لائیو اسکور دیکھیں ↗' : 'See live scores ↗');
-      });
+      .catch(function () { renderError(); });
   }
   load();
   setInterval(function () { if (!document.hidden) load(); }, 120000);

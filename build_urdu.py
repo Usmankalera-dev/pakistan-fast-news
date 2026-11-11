@@ -275,7 +275,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../styles.css?v=20261111r1">
+<link rel="stylesheet" href="../styles.css?v=20261111r2">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -289,7 +289,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {ticker}<main class="wrap">
 <div class="today" id="today-widget" role="status">
 <div class="trow"><span class="tlabel">💵 ڈالر</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="رقم"> <select id="w-cur" aria-label="کرنسی"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option></select> = <b id="w-conv-out">…</b></span></span></div>
-<div class="trow"><span class="tlabel">💱 کرنسیاں</span><span class="tval" id="w-fx">…</span></div>
+<div class="trow trow-fx"><span class="tlabel">💱 کرنسیاں</span><span class="tval" id="w-fx">…</span></div>
 <div class="trow"><span class="tlabel">🌙 ہجری تاریخ</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 سونا · 1 تولہ</span><span class="tval" id="w-gold">…</span></div>
 <div class="trow"><span class="tlabel">🌤️ موسم</span><span class="tval" id="w-weather">…</span></div>
@@ -302,7 +302,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="../script.js" defer></script>
+<script src="../script.js?v=20261111r2" defer></script>
 <button id="totop" class="totop" type="button" aria-label="اوپر جائیں">↑</button>
 </body>
 </html>
@@ -344,7 +344,7 @@ def main():
     # NOTE: id="latest-ur" (not "latest") so script.js does not inject English Dawn cards here.
     cricket_strip = ('<section class="cstrip" id="cricket-strip" data-lang="ur"><h2>🏏 کرکٹ لائیو اسکور</h2>'
                      '<div class="cbody"><p class="cloading">لائیو اسکور لوڈ ہو رہا ہے…</p></div>'
-                     '<p class="fine">لائیو اسکور: <a href="https://sportscore.com/cricket" target="_blank" rel="noopener">Powered by SportScore</a></p></section>')
+                     '<p class="fine" id="cricket-src">لائیو اسکور: <a href="https://sportscore.com/cricket" target="_blank" rel="noopener">Powered by SportScore</a></p></section>')
     home_body = (f'<section><h2 class="toplabel">اہم خبر</h2>{card(hero, now, big=True)}</section>'
                  + cricket_strip +
                  f'<section><h2>تازہ ترین خبریں</h2><div class="grid" id="latest-ur">{"".join(card(i, now) for i in rest)}</div></section>'
