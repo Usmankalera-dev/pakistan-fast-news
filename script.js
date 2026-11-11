@@ -56,6 +56,7 @@
 (function () {
   var w = document.getElementById("today-widget");
   if (!w) return;
+  w.classList.add("w-loading");
   var ur = document.documentElement.lang === "ur";
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return "Rs " + Math.round(n).toLocaleString("en-US"); }
@@ -126,6 +127,7 @@
     document.querySelectorAll("#w-prayer .ptime").forEach(function (el) { el.classList.toggle("now", el.getAttribute("data-k") === next.k); });
   }
   Promise.all([usd, gold, wx, prs, fc]).then(function (res) {
+    w.classList.remove("w-loading");
     var rates = res[0], pkr = rates ? rates.PKR : null, g = res[1], wxx = res[2];
     $("w-usd").textContent = pkr ? fmt(pkr) : "—";
     usdRate = pkr; fxRates = rates; convTick();

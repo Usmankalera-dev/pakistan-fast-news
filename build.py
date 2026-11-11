@@ -317,7 +317,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261111r4">
+<link rel="stylesheet" href="styles.css?v=20261111r5">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -334,8 +334,8 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <div class="trow trow-fx"><span class="tlabel">💱 Currencies</span><span class="tval" id="w-fx">…</span></div>
 <div class="trow"><span class="tlabel">🌙 Hijri date</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
-<div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
-<div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span id="w-prayer">…</span></span></div>
+<div class="trow trow-wx"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
+<div class="trow trow-pr"><span class="tlabel">🕌 Prayer</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span id="w-prayer">…</span></span></div>
 <div class="trow trow-fc"><span class="tlabel">📅 Lahore · 7 days</span><span class="tval"><span class="fcrow" id="w-forecast"></span></span></div>
 <div class="tsrc" id="w-updated"></div>
 </div>
@@ -344,7 +344,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="script.js?v=20261111r3" defer></script>
+<script src="script.js?v=20261111r4" defer></script>
 <button id="totop" class="totop" type="button" aria-label="Back to top">↑</button>
 </body>
 </html>

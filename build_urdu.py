@@ -275,7 +275,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../styles.css?v=20261111r4">
+<link rel="stylesheet" href="../styles.css?v=20261111r5">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -292,8 +292,8 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <div class="trow trow-fx"><span class="tlabel">💱 کرنسیاں</span><span class="tval" id="w-fx">…</span></div>
 <div class="trow"><span class="tlabel">🌙 ہجری تاریخ</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 سونا · 1 تولہ</span><span class="tval" id="w-gold">…</span></div>
-<div class="trow"><span class="tlabel">🌤️ موسم</span><span class="tval" id="w-weather">…</span></div>
-<div class="trow"><span class="tlabel">🕌 نماز</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">لاہور</button><button type="button" class="pcity" data-city="Karachi">کراچی</button><button type="button" class="pcity" data-city="Islamabad">اسلام آباد</button></span><span id="w-prayer">…</span></span></div>
+<div class="trow trow-wx"><span class="tlabel">🌤️ موسم</span><span class="tval" id="w-weather">…</span></div>
+<div class="trow trow-pr"><span class="tlabel">🕌 نماز</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">لاہور</button><button type="button" class="pcity" data-city="Karachi">کراچی</button><button type="button" class="pcity" data-city="Islamabad">اسلام آباد</button></span><span id="w-prayer">…</span></span></div>
 <div class="trow trow-fc"><span class="tlabel">📅 لاہور · 7 دن</span><span class="tval"><span class="fcrow" id="w-forecast"></span></span></div>
 <div class="tsrc" id="w-updated"></div>
 </div>
@@ -302,7 +302,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="../script.js?v=20261111r3" defer></script>
+<script src="../script.js?v=20261111r4" defer></script>
 <button id="totop" class="totop" type="button" aria-label="اوپر جائیں">↑</button>
 </body>
 </html>
