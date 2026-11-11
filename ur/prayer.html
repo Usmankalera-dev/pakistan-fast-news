@@ -25,13 +25,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../styles.css?v=20261111r5">
+<link rel="stylesheet" href="../styles.css?v=20261111r6">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "نماز کے اوقات — ماہانہ ٹائم ٹیبل | پاکستان فاسٹ نیوز", "url": "https://usmankalera-dev.github.io/pakistan-fast-news/ur/prayer.html"}</script>
 </head>
 <body>
 <header class="topbar"><div class="wrap">
 <a class="logo" href="index.html"><img src="../favicon.svg" alt="پاکستان فاسٹ نیوز لوگو" width="36" height="36" class="sitelogo"><span class="logotext">پاکستان <b>فاسٹ نیوز</b><small>پاکستان کی تیز ترین خبریں</small></span></a>
-<div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">اپ ڈیٹ 11 November 2026, 02:23 PM PKT</span></div>
+<div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">اپ ڈیٹ 11 November 2026, 02:51 PM PKT</span></div>
 <button id="theme-toggle" class="themetoggle" type="button" aria-label="ڈارک موڈ">🌙</button>
 <span class="fss"><button id="fs-minus" class="fsbtn" type="button" aria-label="چھوٹا متن">A−</button><button id="fs-plus" class="fsbtn" type="button" aria-label="بڑا متن">A+</button></span>
 </div></header>
@@ -46,13 +46,16 @@
 <a href="../videos.html" class="vidlink">▶ ویڈیوز</a>
 <a href="live-tv.html">📺 لائیو ٹی وی</a>
 <a href="prayer.html">🕌 نماز کے اوقات</a>
+<a href="cricket.html">🏏 کرکٹ</a>
+<a href="search.html">🔍 تلاش</a>
 <a href="../index.html" class="vidlink">English</a></div></nav>
 <main class="wrap">
 <div class="today" id="today-widget" role="status">
-<div class="trow"><span class="tlabel">💵 ڈالر</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="رقم"> <select id="w-cur" aria-label="کرنسی"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option></select> = <b id="w-conv-out">…</b></span></span></div>
-<div class="trow trow-fx"><span class="tlabel">💱 کرنسیاں</span><span class="tval" id="w-fx">…</span></div>
+<div class="trow"><span class="tlabel">💵 ڈالر</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="رقم"> <select id="w-cur" aria-label="کرنسی"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option><option value="JPY">JPY</option><option value="INR">INR</option></select> <button type="button" id="w-swap" title="سمت بدلیں" aria-label="سمت بدلیں">⇄</button> = <b id="w-conv-out">…</b></span></span></div>
+<div class="trow trow-fx"><span class="tlabel">💱 کرنسیاں</span><span class="tval"><span id="w-fx">…</span><span class="fxtrend" id="w-fxtrend"></span></span></div>
 <div class="trow"><span class="tlabel">🌙 ہجری تاریخ</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 سونا · 1 تولہ</span><span class="tval" id="w-gold">…</span></div>
+<div class="trow"><span class="tlabel">🌫️ ہوا کا معیار</span><span class="tval" id="w-aqi">…</span></div>
 <div class="trow trow-wx"><span class="tlabel">🌤️ موسم</span><span class="tval" id="w-weather">…</span></div>
 <div class="trow trow-pr"><span class="tlabel">🕌 نماز</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">لاہور</button><button type="button" class="pcity" data-city="Karachi">کراچی</button><button type="button" class="pcity" data-city="Islamabad">اسلام آباد</button></span><span id="w-prayer">…</span></span></div>
 <div class="trow trow-fc"><span class="tlabel">📅 لاہور · 7 دن</span><span class="tval"><span class="fcrow" id="w-forecast"></span></span></div>
@@ -60,7 +63,7 @@
 </div>
 <h1>🕌 نماز کے اوقات — ماہانہ ٹائم ٹیبل</h1>
 <div class="search"><span class="searchicon" aria-hidden="true">🔍</span><input id="q" type="search" placeholder="خبریں تلاش کریں…" aria-label="خبریں تلاش کریں"></div>
-<p class="crumb"><a href="index.html">ہوم</a> / نماز کے اوقات</p><p class="vintro">ماہانہ نماز کا ٹائم ٹیبل — لاہور، کراچی اور اسلام آباد کے لیے فجر سے عشاء تک۔ اوقات Aladhan نماز API سے براہ راست آتے ہیں (طریقہ: یونیورسٹی آف اسلامک سائنسز، کراچی)۔</p><div class="prayerctl"><span class="pcities" id="prayer-cities"><button type="button" class="pcity active" data-city="Lahore">لاہور</button><button type="button" class="pcity" data-city="Karachi">کراچی</button><button type="button" class="pcity" data-city="Islamabad">اسلام آباد</button></span><span class="monthnav"><button type="button" id="pmonth-prev" aria-label="پچھلا مہینہ">‹ پچھلا</button><b id="pmonth-label">…</b><button type="button" id="pmonth-next" aria-label="اگلا مہینہ">اگلا ›</button></span></div><div class="ptable-wrap"><table class="ptable" id="prayer-table"><thead><tr><th>دن</th><th>تاریخ</th><th>فجر</th><th>طلوع آفتاب</th><th>ظہر</th><th>عصر</th><th>مغرب</th><th>عشاء</th></tr></thead><tbody><tr><td colspan="8" class="ploading">نماز کے اوقات لوڈ ہو رہے ہیں…</td></tr></tbody></table></div><p class="fine">ماخذ: Aladhan نماز API · تمام اوقات مقامی وقت (PKT) کے مطابق ہیں۔ ہجری تاریخ ہر عیسوی تاریخ کے نیچے دکھائی گئی ہے۔</p><script>
+<p class="crumb"><a href="index.html">ہوم</a> / نماز کے اوقات</p><p class="vintro">ماہانہ نماز کا ٹائم ٹیبل — لاہور، کراچی اور اسلام آباد کے لیے فجر سے عشاء تک۔ اوقات Aladhan نماز API سے براہ راست آتے ہیں (طریقہ: یونیورسٹی آف اسلامک سائنسز، کراچی)۔</p><div class="prayerctl"><span class="pcities" id="prayer-cities"><button type="button" class="pcity active" data-city="Lahore">لاہور</button><button type="button" class="pcity" data-city="Karachi">کراچی</button><button type="button" class="pcity" data-city="Islamabad">اسلام آباد</button></span><span class="monthnav"><button type="button" id="pmonth-prev" aria-label="پچھلا مہینہ">‹ پچھلا</button><b id="pmonth-label">…</b><button type="button" id="pmonth-next" aria-label="اگلا مہینہ">اگلا ›</button></span></div><div class="ptable-wrap"><table class="ptable" id="prayer-table"><thead><tr><th>دن</th><th>تاریخ</th><th>فجر</th><th>طلوع آفتاب</th><th>ظہر</th><th>عصر</th><th>مغرب</th><th>عشاء</th></tr></thead><tbody><tr><td colspan="8" class="ploading">نماز کے اوقات لوڈ ہو رہے ہیں…</td></tr></tbody></table></div><section class="hijri-sec"><h2>📅 ہجری کیلنڈر — <span id="hijri-month-label">…</span></h2><div class="hijri-cal" id="hijri-cal"><p class="ploading">ہجری کیلنڈر لوڈ ہو رہا ہے…</p></div></section><section class="qibla-box" id="qibla-box" hidden><h2>🧭 قبلہ کی سمت — <span id="qibla-city">لاہور</span></h2><p class="qibla-line"><span class="qarrow" id="qibla-arrow">➤</span> <span id="qibla-text">…</span></p><p class="fine">ماخذ: Aladhan قبلہ API · سمت شہر کے مرکز سے ہے۔</p></section><p class="fine">ماخذ: Aladhan نماز API · تمام اوقات مقامی وقت (PKT) کے مطابق ہیں۔ ہجری تاریخ ہر عیسوی تاریخ کے نیچے دکھائی گئی ہے۔</p><script>
 (function(){
   var months=["جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"];
   var wdMap={"Monday":"پیر","Tuesday":"منگل","Wednesday":"بدھ","Thursday":"جمعرات","Friday":"جمعہ","Saturday":"ہفتہ","Sunday":"اتوار"};
@@ -70,6 +73,7 @@
   function fmt12(t){var p=String(t).replace(/\(.*\)/,"").trim().split(":");var h=+p[0],m=p[1];var ap=h>=12?"PM":"AM";h=h%12;if(h===0)h=12;return h+":"+m+" "+ap;}
   function load(){
     document.getElementById("pmonth-label").textContent=months[month-1]+" "+year;
+    loadQibla();
     var tb=document.querySelector("#prayer-table tbody");
     tb.innerHTML='<tr><td colspan="8" class="ploading">نماز کے اوقات لوڈ ہو رہے ہیں…</td></tr>';
     fetch("https://api.aladhan.com/v1/calendarByCity/"+year+"/"+month+"?city="+encodeURIComponent(city)+"&country=Pakistan&method=1")
@@ -82,6 +86,7 @@
           return '<tr'+(isToday?' class="today-row"':'')+'><td>'+(wdMap[g.weekday.en]||g.weekday.en)+'</td><td><b>'+g.day+' '+months[+g.month.number-1]+'</b><br><small>'+hj.day+' '+hj.month.ar+' '+hj.year+'ھ</small></td><td>'+fmt12(t.Fajr)+'</td><td>'+fmt12(t.Sunrise)+'</td><td>'+fmt12(t.Dhuhr)+'</td><td>'+fmt12(t.Asr)+'</td><td>'+fmt12(t.Maghrib)+'</td><td>'+fmt12(t.Isha)+'</td></tr>';
         });
         tb.innerHTML=rows.join("");
+        renderHijri(d.data);
       }).catch(function(){
         tb.innerHTML='<tr><td colspan="8" class="ploading">نماز کے اوقات ابھی لوڈ نہیں ہو سکے — براہ کرم اپنا انٹرنیٹ چیک کر کے دوبارہ کوشش کریں۔</td></tr>';
       });
@@ -89,12 +94,53 @@
   document.querySelectorAll("#prayer-cities .pcity").forEach(function(b){b.addEventListener("click",function(){city=b.getAttribute("data-city");document.querySelectorAll("#prayer-cities .pcity").forEach(function(x){x.classList.toggle("active",x===b);});load();});});
   document.getElementById("pmonth-prev").addEventListener("click",function(){month--;if(month<1){month=12;year--;}load();});
   document.getElementById("pmonth-next").addEventListener("click",function(){month++;if(month>12){month=1;year++;}load();});
+    var qiblaCoords={"Lahore":[31.5204,74.3587],"Karachi":[24.8607,67.0011],"Islamabad":[33.6844,73.0479]};
+  var qiblaCityUr={"Lahore":"لاہور","Karachi":"کراچی","Islamabad":"اسلام آباد"};
+  function cardinal(deg){var dirs=["شمال","شمال مشرق","مشرق","جنوب مشرق","جنوب","جنوب مغرب","مغرب","شمال مغرب"];return dirs[Math.round(deg/45)%8];}
+  function renderHijri(data){
+    var cal=document.getElementById("hijri-cal");if(!cal)return;
+    var seen=[];data.forEach(function(day){var m=day.date.hijri.month.ar+" "+day.date.hijri.year;if(seen.indexOf(m)<0)seen.push(m);});
+    document.getElementById("hijri-month-label").textContent=seen.join(" – ")+"ھ";
+    var wd=["پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ","اتوار"];
+    var first=new Date(data[0].date.gregorian.year,data[0].date.gregorian.month.number-1,1);
+    var startIdx=(first.getDay()+6)%7;
+    var today=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Karachi"}));
+    cal.innerHTML="";
+    var head=document.createElement("div");head.className="hcal-head";
+    wd.forEach(function(w){var s=document.createElement("span");s.textContent=w;head.appendChild(s);});
+    cal.appendChild(head);
+    var grid=document.createElement("div");grid.className="hcal-grid";
+    for(var i=0;i<startIdx;i++){var e=document.createElement("span");e.className="hday empty";grid.appendChild(e);}
+    data.forEach(function(day){
+      var g=day.date.gregorian,hj=day.date.hijri;
+      var c=document.createElement("span");c.className="hday";
+      var isToday=(+g.day===today.getDate()&&+g.month.number===today.getMonth()+1&&+g.year===today.getFullYear());
+      if(isToday)c.className="hday today";
+      var b=document.createElement("b");b.textContent=hj.day;c.appendChild(b);
+      var it=document.createElement("i");it.textContent=g.day+" "+months[+g.month.number-1].slice(0,3);c.appendChild(it);
+      grid.appendChild(c);
+    });
+    cal.appendChild(grid);
+  }
+  function loadQibla(){
+    var box=document.getElementById("qibla-box");if(!box)return;
+    var c=qiblaCoords[city]||qiblaCoords.Lahore;
+    document.getElementById("qibla-city").textContent=qiblaCityUr[city]||city;
+    fetch("https://api.aladhan.com/v1/qibla/"+c[0]+"/"+c[1])
+      .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json();}).then(function(d){
+        if(!d||!d.data||d.data.direction==null)throw new Error("empty");
+        var deg=Math.round(d.data.direction*10)/10;
+        document.getElementById("qibla-text").textContent="قبلہ: "+deg+"° · "+cardinal(deg);
+        document.getElementById("qibla-arrow").style.transform="rotate("+(deg-90)+"deg)";
+        box.hidden=false;
+      }).catch(function(){box.hidden=true;});
+  }
   load();
 })();
 </script>
 </main>
-<footer><div class="wrap"><div class="fgrid"><div class="fcol fbrand"><a class="flogo" href="index.html"><img src="../favicon.svg" alt="" width="38" height="38"> پاکستان <b>فاسٹ نیوز</b></a><p>پاکستان اور دنیا کی تیز ترین خبریں — سیاست، کاروبار، کھیل، ٹیکنالوجی اور تفریح، چوبیس گھنٹے تازہ۔</p><p>تیز اور مفت: کوئی اشتہار نہیں، کوئی ٹریکر نہیں، کوئی بھاری اسکرپٹ نہیں۔</p></div><div class="fcol"><h4>شعبے</h4><ul><li><a href="pakistan.html">پاکستان</a></li><li><a href="world.html">دنیا</a></li><li><a href="business.html">کاروبار</a></li><li><a href="sports.html">کھیل</a></li><li><a href="tech.html">ٹیکنالوجی</a></li><li><a href="entertainment.html">تفریح</a></li><li><a href="editorial.html">✍️ خصوصی خبریں</a></li><li><a href="live-tv.html">📺 لائیو ٹی وی</a></li><li><a href="prayer.html">🕌 نماز کے اوقات</a></li></ul></div><div class="fcol"><h4>زبان</h4><ul><li><a href="index.html">اردو</a></li><li><a href="../index.html">English</a></li></ul></div><div class="fcol fsources"><h4>ذرائع</h4><p>خبریں ان ذرائع سے:</p><span class="srclogochip"><img src="../logo-urdu-dawn.png" alt="ڈان اردو لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-ary.png" alt="اے آر وائی اردو لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-express.png" alt="ایکسپریس لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-bbc.png" alt="بی بی سی اردو لوگو" height="24"></span><p class="fine">مکمل خبریں ناشرین کی ویب سائٹس پر کھلتی ہیں — ہم مکمل مضامین کاپی نہیں کرتے۔</p></div></div><div class="newsbox"><h3>📬 سرخیاں اپنے ان باکس میں پائیں</h3><p>روزانہ ایک مختصر ای میل — پاکستان کی تیز ترین سرخیاں، بالکل مفت۔ کوئی سپیم نہیں، کسی بھی وقت ان سبسکرائب کریں۔</p><form action="https://formsubmit.co/su92-bsaim-f25-025@superior.edu.pk" method="POST"><input type="hidden" name="_subject" value="New subscriber — Pakistan Fast News"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_autoresponse" value="Thank you for subscribing to Pakistan Fast News! You will get the fastest headlines from Pakistan and the world in your inbox. — Usman Kalera"><input type="email" name="email" placeholder="آپ کا ای میل پتہ" required aria-label="ای میل پتہ"><button type="submit">سبسکرائب کریں</button></form><p class="fine">FormSubmit کے ذریعے — آپ کا ای میل صرف اس نیوز لیٹر کے لیے استعمال ہوگا۔</p></div><div class="fbot"><span>© 2026 پاکستان فاسٹ نیوز</span><span>اپ ڈیٹ 11 November 2026, 02:23 PM PKT · <a href="../sitemap.xml">سائٹ میپ</a></span></div></div></footer>
-<script src="../script.js?v=20261111r4" defer></script>
+<footer><div class="wrap"><div class="fgrid"><div class="fcol fbrand"><a class="flogo" href="index.html"><img src="../favicon.svg" alt="" width="38" height="38"> پاکستان <b>فاسٹ نیوز</b></a><p>پاکستان اور دنیا کی تیز ترین خبریں — سیاست، کاروبار، کھیل، ٹیکنالوجی اور تفریح، چوبیس گھنٹے تازہ۔</p><p>تیز اور مفت: کوئی اشتہار نہیں، کوئی ٹریکر نہیں، کوئی بھاری اسکرپٹ نہیں۔</p></div><div class="fcol"><h4>شعبے</h4><ul><li><a href="pakistan.html">پاکستان</a></li><li><a href="world.html">دنیا</a></li><li><a href="business.html">کاروبار</a></li><li><a href="sports.html">کھیل</a></li><li><a href="tech.html">ٹیکنالوجی</a></li><li><a href="entertainment.html">تفریح</a></li><li><a href="editorial.html">✍️ خصوصی خبریں</a></li><li><a href="live-tv.html">📺 لائیو ٹی وی</a></li><li><a href="prayer.html">🕌 نماز کے اوقات</a></li><li><a href="cricket.html">🏏 کرکٹ</a></li><li><a href="search.html">🔍 تلاش</a></li></ul></div><div class="fcol"><h4>زبان</h4><ul><li><a href="index.html">اردو</a></li><li><a href="../index.html">English</a></li></ul></div><div class="fcol fsources"><h4>ذرائع</h4><p>خبریں ان ذرائع سے:</p><span class="srclogochip"><img src="../logo-urdu-dawn.png" alt="ڈان اردو لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-ary.png" alt="اے آر وائی اردو لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-express.png" alt="ایکسپریس لوگو" height="24"></span><span class="srclogochip"><img src="../logo-urdu-bbc.png" alt="بی بی سی اردو لوگو" height="24"></span><p class="fine">مکمل خبریں ناشرین کی ویب سائٹس پر کھلتی ہیں — ہم مکمل مضامین کاپی نہیں کرتے۔</p></div></div><div class="newsbox"><h3>📬 سرخیاں اپنے ان باکس میں پائیں</h3><p>روزانہ ایک مختصر ای میل — پاکستان کی تیز ترین سرخیاں، بالکل مفت۔ کوئی سپیم نہیں، کسی بھی وقت ان سبسکرائب کریں۔</p><form action="https://formsubmit.co/su92-bsaim-f25-025@superior.edu.pk" method="POST"><input type="hidden" name="_subject" value="New subscriber — Pakistan Fast News"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_autoresponse" value="Thank you for subscribing to Pakistan Fast News! You will get the fastest headlines from Pakistan and the world in your inbox. — Usman Kalera"><input type="email" name="email" placeholder="آپ کا ای میل پتہ" required aria-label="ای میل پتہ"><button type="submit">سبسکرائب کریں</button></form><p class="fine">FormSubmit کے ذریعے — آپ کا ای میل صرف اس نیوز لیٹر کے لیے استعمال ہوگا۔</p></div><div class="fbot"><span>© 2026 پاکستان فاسٹ نیوز</span><span>اپ ڈیٹ 11 November 2026, 02:51 PM PKT · <a href="../sitemap.xml">سائٹ میپ</a></span></div></div></footer>
+<script src="../script.js?v=20261111r5" defer></script>
 <button id="totop" class="totop" type="button" aria-label="اوپر جائیں">↑</button>
 </body>
 </html>
