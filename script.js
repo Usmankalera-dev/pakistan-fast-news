@@ -133,10 +133,10 @@
     if (fxEl) {
       if (rates && pkr) {
         var sym = { GBP: "£", EUR: "€", SAR: "SR ", AED: "AED ", CNY: "¥" };
-        fxEl.innerHTML = ["GBP", "EUR", "SAR", "AED", "CNY"].map(function (c) {
+        fxEl.innerHTML = '<span class="fxchips">' + ["GBP", "EUR", "SAR", "AED", "CNY"].map(function (c) {
           var v = rates[c] ? pkr / rates[c] : null;
           return '<span class="fxchip">' + sym[c] + '1 = ' + (v ? fmt(v) : "—") + '</span>';
-        }).join("");
+        }).join("") + '</span>';
       } else { fxEl.textContent = "—"; }
     }
     if (pkr && g) {

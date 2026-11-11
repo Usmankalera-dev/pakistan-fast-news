@@ -1,6 +1,7 @@
 :root{--bg:#fff;--fg:#111;--link:#0b5ed7;--muted:#666;--faint:#888;--desc:#444;--card:#fff;--border:#e3e3e3;--soft:#fff5f5;--soft-border:#f0d5d5;--input-border:#ccc;--thumb-bg:#f0f0f0;--fallback-bg:#f1f1f1}
 [data-theme="dark"]{--bg:#141414;--fg:#e8e8e8;--link:#7ab8ff;--muted:#aaa;--faint:#999;--desc:#ccc;--card:#1e1e1e;--border:#333;--soft:#2a1a1a;--soft-border:#4a2a2a;--input-border:#444;--thumb-bg:#222;--fallback-bg:#222}
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55;font-size:calc(17px * var(--fss, 1))}
 .wrap{max-width:1060px;margin:0 auto;padding:0 16px}
 a{color:var(--link);text-decoration:none}
@@ -146,7 +147,7 @@ html[dir="rtl"] h1,html[dir="rtl"] h2{line-height:1.9}
 .fday i{display:block;font-style:normal;color:var(--muted);font-size:12.5px}
 .fday b{display:block;font-size:14.5px}
 .tsrc{font-size:12.5px;color:var(--faint);padding-top:9px}
-@media(max-width:640px){.tlabel{flex-basis:88px;font-size:13px}.trow{padding:9px 0}.trow-fx{flex-direction:column;gap:4px}.trow-fx .tlabel{flex-basis:auto;padding-top:0}.fxchip{font-size:12.5px;padding:3px 9px}}
+@media(max-width:640px){.tlabel{flex-basis:88px;font-size:13px}.trow{padding:9px 0}.trow-fx{flex-direction:column;gap:4px;align-items:stretch}.trow-fx .tlabel{flex-basis:auto;padding-top:0}.trow-fx .tval{width:100%}.fxchip{font-size:12.5px;padding:3px 9px}}
 
 /* Phase 4: theme toggle + share buttons */
 .topbar .clock{margin-inline-start:auto}
@@ -282,8 +283,8 @@ html[dir="rtl"] .card.hero.heroimg .heroover h3{line-height:1.9}
 
 /* ---- Upgrade round 2026-11-11: Hijri/FX widget, Suno, Live TV, prayer, cricket, newsletter, comments ---- */
 /* Widget: FX chips + converter currency select */
-.fxchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.fxchip{background:var(--thumb-bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.fxchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;direction:ltr}
+.fxchip{background:var(--thumb-bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap;unicode-bidi:isolate}
 #w-cur{font:inherit;font-size:13.5px;padding:6px 8px;border:1px solid var(--input-border);border-radius:8px;background:var(--card);color:var(--fg)}
 /* Suno listen button */
 .suno-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:inherit;font-size:13.5px;font-weight:700;padding:7px 13px;border-radius:20px;border:1px solid #0b7a3e;background:transparent;color:#0b7a3e;cursor:pointer}
