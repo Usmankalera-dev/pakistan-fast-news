@@ -279,3 +279,69 @@ html[dir="rtl"] h2.toplabel{line-height:1.9}
   .card.hero.heroimg .heroover h3{font-size:21px}
 }
 html[dir="rtl"] .card.hero.heroimg .heroover h3{line-height:1.9}
+
+/* ---- Upgrade round 2026-11-11: Hijri/FX widget, Suno, Live TV, prayer, cricket, newsletter, comments ---- */
+/* Widget: FX chips + converter currency select */
+.fxchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fxchip{background:var(--thumb-bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}
+#w-cur{font:inherit;font-size:13.5px;padding:6px 8px;border:1px solid var(--input-border);border-radius:8px;background:var(--card);color:var(--fg)}
+/* Suno listen button */
+.suno-btn{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font:inherit;font-size:13.5px;font-weight:700;padding:7px 13px;border-radius:20px;border:1px solid #0b7a3e;background:transparent;color:#0b7a3e;cursor:pointer}
+.suno-btn:hover{background:#0b7a3e;color:#fff}
+.suno-btn.speaking{background:#0b7a3e;color:#fff;border-color:#0b7a3e}
+/* Live TV */
+.tvplayer{position:relative;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;margin:14px 0;display:flex;align-items:center;justify-content:center}
+.tvplayer iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tvhint{color:#bbb;font-size:16px;text-align:center;padding:0 20px}
+.tvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin:6px 0 14px}
+.tvcard{border:1px solid var(--border);border-radius:14px;padding:16px 14px;background:var(--card);text-align:center}
+.tvcard.active{border-color:#c8102e;box-shadow:0 0 0 2px rgba(200,16,46,.25)}
+.tvcard img{border-radius:50%;object-fit:cover}
+.tvcard h3{margin:10px 0 10px;font-size:17px}
+.tvbtn{font:inherit;font-weight:700;font-size:14px;padding:8px 16px;border-radius:20px;border:0;background:#c8102e;color:#fff;cursor:pointer}
+.tvbtn:hover{filter:brightness(1.1)}
+.tvcard a{display:block;margin-top:10px;font-size:13.5px}
+/* Prayer timetable */
+.prayerctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:14px 0}
+.pcities{display:flex;gap:8px;flex-wrap:wrap}
+.pcity{font:inherit;font-weight:700;font-size:14px;padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer}
+.pcity.active{background:#0b7a3e;border-color:#0b7a3e;color:#fff}
+.monthnav{display:flex;gap:8px;align-items:center}
+.monthnav button{font:inherit;font-weight:700;font-size:13.5px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer}
+.monthnav b{min-width:130px;text-align:center}
+.ptable-wrap{overflow-x:auto;margin-bottom:14px}
+.ptable{width:100%;border-collapse:collapse;min-width:640px}
+.ptable th,.ptable td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:center;font-size:14.5px}
+.ptable th{background:var(--thumb-bg);font-weight:800}
+.ptable td small{color:var(--muted)}
+.ptable tr.today-row td{background:var(--soft);font-weight:700}
+.ploading{color:var(--muted);text-align:center;padding:18px 0}
+/* Cricket live score strip */
+.cstrip{border:1px solid var(--border);border-left:4px solid #0b7a3e;border-radius:14px;padding:14px 16px;background:var(--card);margin:18px 0}
+.cstrip h2{border:0;padding:0;margin:0 0 8px}
+.cbadge{font-weight:800;color:#c8102e;margin:0 0 6px;font-size:14px}
+.cteams{font-size:17px;margin:0 0 4px}
+.cstatus{color:var(--muted);font-size:14px;margin:0 0 8px}
+.clink a{font-weight:700;font-size:14px}
+.cloading{color:var(--muted)}
+/* Newsletter */
+.newsbox{border:1px solid var(--border);border-radius:14px;padding:18px;background:linear-gradient(180deg,var(--soft),var(--card));margin:22px 0}
+.newsbox h3{margin:0 0 6px;font-size:19px}
+.newsbox p{margin:0 0 12px;color:var(--desc);font-size:15px}
+.newsbox form{display:flex;gap:8px;flex-wrap:wrap}
+.newsbox input[type="email"]{flex:1 1 220px;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--input-border);border-radius:10px;background:var(--card);color:var(--fg)}
+.newsbox button{font:inherit;font-weight:700;font-size:15px;padding:11px 20px;border-radius:10px;border:0;background:#c8102e;color:#fff;cursor:pointer}
+.newsbox button:hover{filter:brightness(1.1)}
+.newsbox .fine{margin:10px 0 0;font-size:13px;color:var(--muted)}
+/* Comments (Giscus placeholder) */
+.comments{border-top:1px solid var(--border);margin-top:24px;padding-top:16px}
+.comments h2{border:0;padding:0}
+.cnote{color:var(--muted);font-size:15px}
+@media(max-width:640px){
+  .tvgrid{grid-template-columns:repeat(2,1fr)}
+  .newsbox form{flex-direction:column}
+  .newsbox button{width:100%}
+  .prayerctl{flex-direction:column;align-items:stretch}
+  .monthnav{justify-content:space-between}
+}
+@media (prefers-reduced-motion: reduce){.card:hover{transform:none}}

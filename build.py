@@ -166,6 +166,12 @@ def rel(dt, now):
     if h < 24: return f"{h}h ago"
     return f"{h // 24}d ago"
 
+def suno_btn(text, lang, label):
+    """One listen button per card (browser speechSynthesis, no key, no paid TTS)."""
+    return (f'<button class="suno-btn" type="button" data-speak="{H.escape(text, quote=True)}" '
+            f'data-lang="{lang}">{label}</button>')
+
+
 def share_row(it):
     enc = urlquote(it["title"] + " " + it["link"])
     fb = urlquote(it["link"])
@@ -199,13 +205,13 @@ def card(it, now, big=False):
                 f'<img src="{H.escape(it["img"])}" alt="" loading="eager" onerror="this.closest(\'.herowrap\').classList.add(\'imgfail\');this.closest(\'article\').classList.add(\'hero-noimg\')"></a>'
                 f'<span class="herograd"></span>'
                 f'<div class="heroover">{title}</div></div>'
-                f'<div class="herobody">{meta}{desc}{readmore}' + share_row(it) + '</div></article>')
+                f'<div class="herobody">{meta}{desc}{readmore}' + share_row(it) + suno_btn(it["title"] + ". " + it.get("desc", ""), "en", "🔊 Listen") + '</div></article>')
     thumb = ""
     if it.get("img"):
         thumb = (f"<a class=\"thumbwrap\" href=\"{link}\" target=\"_blank\" rel=\"noopener\" tabindex=\"-1\" aria-hidden=\"true\">"
                  f"<img class=\"thumb\" src=\"{H.escape(it['img'])}\" alt=\"\" loading=\"lazy\" onerror=\"this.closest('.thumbwrap').remove()\"></a>")
     cls = "card hero" if big else "card"
-    return (f'<article class="{cls} cat-{it["cat"]}">{thumb}{meta}{title}{desc}{readmore}' + share_row(it) + '</article>')
+    return (f'<article class="{cls} cat-{it["cat"]}">{thumb}{meta}{title}{desc}{readmore}' + share_row(it) + suno_btn(it["title"] + ". " + it.get("desc", ""), "en", "🔊 Listen") + '</article>')
 
 def load_editorial(lang):
     """Original news written by Usman, newest first. File: editorial.json (repo root)."""
@@ -228,11 +234,11 @@ def ed_card(it, now, idx, base_url):
             f'<time datetime="{it["date"]}">{rel(dt, now)} · {dt.strftime("%d %b %Y")} PKT</time></div>')
     return (f'<article class="card cat-{it.get("cat", "pakistan")}" id="ed-{idx}">{meta}'
             f'<h3>{H.escape(it["title"])}</h3>'
-            f'<p>{H.escape(it["body"])}</p>' + share_row({"title": it["title"], "link": link}) + '</article>')
+            f'<p>{H.escape(it["body"])}</p>' + share_row({"title": it["title"], "link": link}) + suno_btn(it["title"] + ". " + it.get("body", ""), "en", "🔊 Listen") + '</article>')
 
 
 def nav(active=""):
-    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("editorial.html", "✍️ Exclusive"), ("videos.html", "Videos"), ("ur/index.html", "اردو")]
+    links = [("index.html", "Home")] + [(f"{c}.html", CAT_LABEL[c]) for c in CATS] + [("editorial.html", "✍️ Exclusive"), ("videos.html", "Videos"), ("live-tv.html", "📺 Live TV"), ("prayer.html", "🕌 Prayer Times"), ("ur/index.html", "اردو")]
     out = []
     for href, label in links:
         cls = ' class="active"' if href == active else ""
@@ -242,11 +248,30 @@ def nav(active=""):
         out.append(f'<a href="{href}"{cls}>{label}</a>')
     return "\n".join(out)
 
+def newsletter_box(box_id=""):
+    """Free FormSubmit signup (no account). Activation: Usman clicks the one
+    confirmation email FormSubmit sends to his university inbox after the first signup."""
+    idattr = f' id="{box_id}"' if box_id else ""
+    return (f'<div class="newsbox"{idattr}>'
+            '<h3>📬 Get the headlines in your inbox</h3>'
+            '<p>One short email a day — the fastest Pakistan headlines, free. No spam, unsubscribe anytime.</p>'
+            '<form action="https://formsubmit.co/su92-bsaim-f25-025@superior.edu.pk" method="POST">'
+            '<input type="hidden" name="_subject" value="New subscriber — Pakistan Fast News">'
+            '<input type="hidden" name="_template" value="table">'
+            '<input type="hidden" name="_captcha" value="false">'
+            '<input type="hidden" name="_autoresponse" value="Thank you for subscribing to Pakistan Fast News! You will get the fastest headlines from Pakistan and the world in your inbox. — Usman Kalera">'
+            '<input type="email" name="email" placeholder="Your email address" required aria-label="Email address">'
+            '<button type="submit">Subscribe</button></form>'
+            '<p class="fine">Powered by FormSubmit — your email is only used for this newsletter.</p></div>')
+
+
 def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker=""):
     now_s = datetime.now(PKT).strftime("%d %B %Y, %I:%M %p PKT")
     fsecs = "".join(f'<li><a href="{c}.html">{CAT_LABEL[c]}</a></li>' for c in CATS)
     fsecs += '<li><a href="editorial.html">✍️ Exclusive</a></li>'
     fsecs += '<li><a href="videos.html">▶ Videos</a></li>'
+    fsecs += '<li><a href="live-tv.html">📺 Live TV</a></li>'
+    fsecs += '<li><a href="prayer.html">🕌 Prayer Times</a></li>'
     fchans = "".join(
         f'<li><a class="fchan" href="videos.html#{slug}"><img src="yt-{slug}.jpg" alt="" width="22" height="22" loading="lazy">{name}</a></li>'
         for name, _cid, slug in YT_CHANNELS)
@@ -263,7 +288,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
         '<span class="srclogochip"><img src="logo-bbc.gif" alt="BBC News logo" height="22"></span>'
         '<span class="srclogochip"><img src="logo-thenews.svg" alt="The News logo" height="22"></span>'
         '<p class="fine">Full stories open on the publishers\u2019 sites — we never copy full articles. Videos play from the channels\u2019 official YouTube channels.</p></div>'
-        '</div><div class="fbot"><span>© 2026 Pakistan Fast News</span>'
+        '</div>' + newsletter_box() + '<div class="fbot"><span>© 2026 Pakistan Fast News</span>'
         '<span>Updated ' + now_s + ' · <a href="sitemap.xml">Sitemap</a></span></div></div></footer>')
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -292,7 +317,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261107r3">
+<link rel="stylesheet" href="styles.css?v=20261111r1">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -305,7 +330,9 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <nav class="mainnav" aria-label="Sections"><div class="wrap">{nav(active)}</div></nav>
 {ticker}<main class="wrap">
 <div class="today" id="today-widget" role="status">
-<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="US dollars"> USD = <b id="w-conv-out">…</b></span></span></div>
+<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="Amount"> <select id="w-cur" aria-label="Currency"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option></select> = <b id="w-conv-out">…</b></span></span></div>
+<div class="trow"><span class="tlabel">💱 Currencies</span><span class="tval" id="w-fx">…</span></div>
+<div class="trow"><span class="tlabel">🌙 Hijri date</span><span class="tval" id="w-hijri">…</span></div>
 <div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
 <div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
 <div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span id="w-prayer">…</span></span></div>
@@ -322,6 +349,12 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 </body>
 </html>
 """
+
+PRAYER_BODY_EN = '<p class="crumb"><a href="index.html">Home</a> / Prayer Times</p><p class="vintro">Monthly prayer timetable — Fajr to Isha for Lahore, Karachi and Islamabad. Times come live from the Aladhan prayer-times API (calculation method: University of Islamic Sciences, Karachi).</p><div class="prayerctl"><span class="pcities" id="prayer-cities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span class="monthnav"><button type="button" id="pmonth-prev" aria-label="Previous month">‹ Prev</button><b id="pmonth-label">…</b><button type="button" id="pmonth-next" aria-label="Next month">Next ›</button></span></div><div class="ptable-wrap"><table class="ptable" id="prayer-table"><thead><tr><th>Day</th><th>Date</th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr></thead><tbody><tr><td colspan="8" class="ploading">Loading prayer times…</td></tr></tbody></table></div><p class="fine">Source: Aladhan prayer times API · All times local (PKT). Hijri dates are shown under each Gregorian date.</p><script>\n(function(){\n  var months=["January","February","March","April","May","June","July","August","September","October","November","December"];\n  var city="Lahore";\n  var now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Karachi"}));\n  var year=now.getFullYear(), month=now.getMonth()+1;\n  function fmt12(t){var p=String(t).replace(/\\(.*\\)/,"").trim().split(":");var h=+p[0],m=p[1];var ap=h>=12?"PM":"AM";h=h%12;if(h===0)h=12;return h+":"+m+" "+ap;}\n  function load(){\n    document.getElementById("pmonth-label").textContent=months[month-1]+" "+year;\n    var tb=document.querySelector("#prayer-table tbody");\n    tb.innerHTML=\'<tr><td colspan="8" class="ploading">Loading prayer times…</td></tr>\';\n    fetch("https://api.aladhan.com/v1/calendarByCity/"+year+"/"+month+"?city="+encodeURIComponent(city)+"&country=Pakistan&method=1")\n      .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json();}).then(function(d){\n        if(!d||!d.data||!d.data.length)throw new Error("empty");\n        var today=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Karachi"}));\n        var rows=d.data.map(function(day){\n          var g=day.date.gregorian,hj=day.date.hijri,t=day.timings;\n          var isToday=(+g.day===today.getDate()&&+g.month.number===today.getMonth()+1&&+g.year===today.getFullYear());\n          return \'<tr\'+(isToday?\' class="today-row"\':\'\')+\'><td>\'+g.weekday.en.slice(0,3)+\'</td><td><b>\'+g.day+\' \'+g.month.en+\'</b><br><small>\'+hj.day+\' \'+hj.month.en+\' \'+hj.year+\' AH</small></td><td>\'+fmt12(t.Fajr)+\'</td><td>\'+fmt12(t.Sunrise)+\'</td><td>\'+fmt12(t.Dhuhr)+\'</td><td>\'+fmt12(t.Asr)+\'</td><td>\'+fmt12(t.Maghrib)+\'</td><td>\'+fmt12(t.Isha)+\'</td></tr>\';\n        });\n        tb.innerHTML=rows.join("");\n      }).catch(function(){\n        tb.innerHTML=\'<tr><td colspan="8" class="ploading">Could not load prayer times right now — please check your connection and try again.</td></tr>\';\n      });\n  }\n  document.querySelectorAll("#prayer-cities .pcity").forEach(function(b){b.addEventListener("click",function(){city=b.getAttribute("data-city");document.querySelectorAll("#prayer-cities .pcity").forEach(function(x){x.classList.toggle("active",x===b);});load();});});\n  document.getElementById("pmonth-prev").addEventListener("click",function(){month--;if(month<1){month=12;year--;}load();});\n  document.getElementById("pmonth-next").addEventListener("click",function(){month++;if(month>12){month=1;year++;}load();});\n  load();\n})();\n</script>'
+
+
+LIVE_TV_BODY_EN = '<p class="crumb"><a href="index.html">Home</a> / Live TV</p><p class="vintro">Watch Pakistan’s top news channels live — straight from their official YouTube live streams. Pick a channel below; the stream loads right here on this page.</p><div class="tvplayer" id="tvplayer"><p class="tvhint">▶ Select a channel below to start its live stream.</p></div><div class="tvgrid"><article class="tvcard"><img src="yt-geo.jpg" alt="Geo News logo" width="64" height="64" loading="lazy"><h3>Geo News</h3><button class="tvbtn" type="button" data-ch="UC_vt34wimdCzdkrzVejwX9g" data-name="Geo News">▶ Watch live</button><a href="https://www.youtube.com/channel/UC_vt34wimdCzdkrzVejwX9g" target="_blank" rel="noopener">Open on YouTube ↗</a></article><article class="tvcard"><img src="yt-ary.jpg" alt="ARY News logo" width="64" height="64" loading="lazy"><h3>ARY News</h3><button class="tvbtn" type="button" data-ch="UCMmpLL2ucRHAXbNHiCPyIyg" data-name="ARY News">▶ Watch live</button><a href="https://www.youtube.com/channel/UCMmpLL2ucRHAXbNHiCPyIyg" target="_blank" rel="noopener">Open on YouTube ↗</a></article><article class="tvcard"><img src="yt-dawn.jpg" alt="Dawn News logo" width="64" height="64" loading="lazy"><h3>Dawn News</h3><button class="tvbtn" type="button" data-ch="UCaxR-D8FjZ-2otbU0_Y2grg" data-name="Dawn News">▶ Watch live</button><a href="https://www.youtube.com/channel/UCaxR-D8FjZ-2otbU0_Y2grg" target="_blank" rel="noopener">Open on YouTube ↗</a></article><article class="tvcard"><img src="yt-samaa.jpg" alt="Samaa TV logo" width="64" height="64" loading="lazy"><h3>Samaa TV</h3><button class="tvbtn" type="button" data-ch="UCJekW1Vj5fCVEGdye_mBN6Q" data-name="Samaa TV">▶ Watch live</button><a href="https://www.youtube.com/channel/UCJekW1Vj5fCVEGdye_mBN6Q" target="_blank" rel="noopener">Open on YouTube ↗</a></article><article class="tvcard"><img src="yt-dunya.jpg" alt="Dunya News logo" width="64" height="64" loading="lazy"><h3>Dunya News</h3><button class="tvbtn" type="button" data-ch="UCnMBV5Iw4WqKILKue1nP6Hg" data-name="Dunya News">▶ Watch live</button><a href="https://www.youtube.com/channel/UCnMBV5Iw4WqKILKue1nP6Hg" target="_blank" rel="noopener">Open on YouTube ↗</a></article><article class="tvcard"><img src="yt-express.jpg" alt="Express News logo" width="64" height="64" loading="lazy"><h3>Express News</h3><button class="tvbtn" type="button" data-ch="UCTur7oM6mLL0rM2k0znuZpQ" data-name="Express News">▶ Watch live</button><a href="https://www.youtube.com/channel/UCTur7oM6mLL0rM2k0znuZpQ" target="_blank" rel="noopener">Open on YouTube ↗</a></article></div><p class="fine">Streams are the channels’ official YouTube live broadcasts (youtube-nocookie embeds). If a channel is not live right now, YouTube shows its offline message — try another channel.</p><script>\n(function(){\n  var player=document.getElementById("tvplayer");\n  document.querySelectorAll(".tvbtn").forEach(function(b){\n    b.addEventListener("click",function(){\n      var ch=b.getAttribute("data-ch"), name=b.getAttribute("data-name");\n      player.innerHTML=\'<iframe title="Live TV — \'+name+\'" src="https://www.youtube-nocookie.com/embed/live_stream?channel=\'+ch+\'&autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>\';\n      document.querySelectorAll(".tvcard").forEach(function(c){c.classList.toggle("active", c===b.closest(".tvcard"));});\n      player.scrollIntoView({behavior:"smooth", block:"center"});\n    });\n  });\n})();\n</script>'
+
 
 def main():
     out_dir = Path(__file__).parent
@@ -348,9 +381,13 @@ def main():
         if len(lst) < 2:
             continue
         sections += f'<section><h2>{CAT_EMOJI[c]} {CAT_LABEL[c]} <span class="h2note">· newest {rel(max(i["dt"] for i in lst), now)}</span> <a class="more" href="{c}.html">More →</a></h2><div class="grid">{"".join(card(i, now) for i in lst)}</div></section>'
+    cricket_strip = ('<section class="cstrip" id="cricket-strip" data-lang="en"><h2>🏏 Cricket live score</h2>'
+                     '<div class="cbody"><p class="cloading">Loading live score…</p></div>'
+                     '<p class="fine">Live scores: <a href="https://sportscore.com/cricket" target="_blank" rel="noopener">Powered by SportScore</a></p></section>')
     home_body = (f'<section><h2 class="toplabel">Top story</h2>{card(hero, now, big=True)}</section>'
+                 + cricket_strip +
                  f'<section><h2>Latest headlines</h2><div class="grid" id="latest">{"".join(card(i, now) for i in rest)}</div></section>'
-                 + ed_section + sections)
+                 + ed_section + newsletter_box("newsletter") + sections)
     hero_ld = {"@context": "https://schema.org", "@type": "NewsArticle",
                "headline": hero["title"], "datePublished": hero["dt"].isoformat(),
                "dateModified": hero["dt"].isoformat(), "author": {"@type": "Organization", "name": hero["source"]},
@@ -368,9 +405,19 @@ def main():
              "url": f"{BASE}/editorial.html",
              "hasPart": [{"@type": "NewsArticle", "headline": i["title"], "datePublished": i["date"],
                           "author": {"@type": "Person", "name": "Usman Kalera"}, "url": f"{BASE}/editorial.html#ed-{n}"} for n, i in enumerate(ed_items[:10])]}
+    comments_section = ('<section class="comments"><h2>💬 Comments</h2>'
+        '<p class="cnote">Comments open soon — you\'ll be able to sign in with GitHub and join the discussion here.</p>'
+        '<!-- GISCUS SETUP (once, in GitHub — then uncomment the script below):\n'
+        '  1. Repo → Settings → General → Features → tick "Discussions".\n'
+        '  2. Install the giscus app on this repo: https://github.com/apps/giscus\n'
+        '  3. In Discussions, use the "General" category (created automatically when Discussions is enabled).\n'
+        '  4. Go to https://giscus.app, enter repo Usmankalera-dev/pakistan-fast-news, pick the category,\n'
+        '     copy the repo-id + category-id it shows, paste them below, and uncomment this script.\n'
+        '  <script src="https://giscus.app/client.js" data-repo="Usmankalera-dev/pakistan-fast-news" data-repo-id="TODO-REPO-ID" data-category="General" data-category-id="TODO-CATEGORY-ID" data-mapping="pathname" data-strict="0" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="preferred_color_scheme" data-lang="en" crossorigin="anonymous" async></scr' + 'ipt>\n'
+        '--></section>')
     ed_body = ('<p class="crumb"><a href="index.html">Home</a> / Exclusive</p>'
                '<p class="secupd">Original news written by Usman Kalera for Pakistan Fast News — fresh stories every day.</p>'
-               '<div class="grid">' + "".join(ed_cards) + '</div>' if ed_cards else
+               '<div class="grid">' + "".join(ed_cards) + '</div>' + comments_section if ed_cards else
                '<p class="crumb"><a href="index.html">Home</a> / Exclusive</p><p>Our own newsroom is getting ready — the first story is coming soon.</p>')
     (out_dir / "editorial.html").write_text(page(
         "Exclusive — Original News by Usman Kalera | Pakistan Fast News",
@@ -477,8 +524,26 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidd
             "Watch the latest Pakistan news videos from Geo News, ARY News, Dawn News, Samaa, Dunya, Express, Hum, BOL, 92 News, Aaj and Neo — play them right here on Pakistan Fast News.",
             BASE + "/videos.html", "🎬 Pakistan news videos", videos_body, json.dumps(vids_ld, ensure_ascii=False), "videos.html"), encoding="utf-8")
 
+    # ---- Live TV page (official YouTube live_stream embeds, click-to-load) ----
+    live_ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Live TV — Pakistan News Channels | Pakistan Fast News",
+               "url": BASE + "/live-tv.html"}
+    (out_dir / "live-tv.html").write_text(page(
+        "Live TV — Watch Geo, ARY, Dawn, Samaa, Dunya & Express Live | Pakistan Fast News",
+        "Watch Pakistan news channels live — Geo News, ARY News, Dawn News, Samaa TV, Dunya News and Express News, from their official YouTube live streams.",
+        BASE + "/live-tv.html", "📺 Live TV — Pakistan news channels", LIVE_TV_BODY_EN,
+        json.dumps(live_ld, ensure_ascii=False), "live-tv.html"), encoding="utf-8")
+
+    # ---- Prayer timetable page (monthly, Aladhan calendar API, client-side) ----
+    prayer_ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Prayer Times — Monthly Timetable | Pakistan Fast News",
+                 "url": BASE + "/prayer.html"}
+    (out_dir / "prayer.html").write_text(page(
+        "Prayer Times — Monthly Timetable (Lahore, Karachi, Islamabad) | Pakistan Fast News",
+        "Monthly prayer timetable for Lahore, Karachi and Islamabad — Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, with Hijri dates, from the Aladhan API.",
+        BASE + "/prayer.html", "🕌 Prayer times — monthly timetable", PRAYER_BODY_EN,
+        json.dumps(prayer_ld, ensure_ascii=False), "prayer.html"), encoding="utf-8")
+
     # ---- sitemap + robots + 404 ----
-    urls = [("", "1.0"), ("editorial.html", "0.9"), ("videos.html", "0.9"), ("ur/", "0.9"), ("ur/editorial.html", "0.8")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
+    urls = [("", "1.0"), ("editorial.html", "0.9"), ("videos.html", "0.9"), ("live-tv.html", "0.8"), ("prayer.html", "0.8"), ("ur/", "0.9"), ("ur/editorial.html", "0.8"), ("ur/live-tv.html", "0.7"), ("ur/prayer.html", "0.7")] + [(f"{c}.html", "0.8") for c in CATS] + [(f"ur/{c}.html", "0.8") for c in CATS]
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, pr in urls:
         sm.append(f"<url><loc>{BASE}/{u}</loc><lastmod>{today}</lastmod><priority>{pr}</priority></url>")

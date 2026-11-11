@@ -37,6 +37,11 @@
             '<button class="share-copy" type="button" data-link="' + it.link.replace(/"/g, "%22") + '">Copy link</button>' +
             '<button class="share-native" type="button" data-link="' + it.link.replace(/"/g, "%22") + '">Share</button></div>';
           art.querySelector("h3 a").textContent = it.title;
+          var sb = document.createElement("button");
+          sb.className = "suno-btn"; sb.type = "button";
+          sb.setAttribute("data-speak", it.title); sb.setAttribute("data-lang", "en");
+          sb.textContent = "🔊 Listen";
+          art.appendChild(sb);
           var nb = art.querySelector(".share-native");
           nb.setAttribute("data-title", it.title);
           if (navigator.share) { nb.style.display = "inline-block"; }
@@ -68,7 +73,7 @@
   var pk = pktParts();
   var cities = ["Lahore", "Karachi", "Islamabad"];
   var prs = Promise.all(cities.map(function (c) {
-    return getJSON("https://api.aladhan.com/v1/timingsByCity/" + pk.dd + "-" + pk.mm + "-" + pk.yy + "?city=" + c + "&country=Pakistan&method=1").then(function (d) { return d && d.data ? d.data.timings : null; });
+    return getJSON("https://api.aladhan.com/v1/timingsByCity/" + pk.dd + "-" + pk.mm + "-" + pk.yy + "?city=" + c + "&country=Pakistan&method=1").then(function (d) { return d && d.data ? d.data : null; });
   }));
   var prayerCity = "Lahore";
   try { prayerCity = localStorage.getItem("pfn-prayer-city") || "Lahore"; } catch (e) {}
@@ -89,17 +94,21 @@
     prayerTick();
     if (!prayerTimer) prayerTimer = setInterval(prayerTick, 30000);
   }
-  var usdRate = null;
+  var usdRate = null, fxRates = null;
   function convTick() {
-    var inp = document.getElementById("w-conv"), out = document.getElementById("w-conv-out");
+    var inp = document.getElementById("w-conv"), out = document.getElementById("w-conv-out"), sel = document.getElementById("w-cur");
     if (!inp || !out) return;
     var v = parseFloat(inp.value);
-    out.textContent = (usdRate && !isNaN(v) && v >= 0) ? fmt(v * usdRate) : "—";
+    var cur = sel ? sel.value : "USD";
+    var rate = (cur === "USD") ? usdRate : (fxRates && fxRates[cur] && usdRate ? usdRate / fxRates[cur] : null);
+    out.textContent = (rate && !isNaN(v) && v >= 0) ? fmt(v * rate) : "—";
   }
   var convInp = document.getElementById("w-conv");
   if (convInp) convInp.addEventListener("input", convTick);
+  var convSel = document.getElementById("w-cur");
+  if (convSel) convSel.addEventListener("change", convTick);
   function getJSON(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); }).catch(function () { return null; }); }
-  var usd = getJSON("https://open.er-api.com/v6/latest/USD").then(function (d) { return d && d.rates ? d.rates.PKR : null; });
+  var usd = getJSON("https://open.er-api.com/v6/latest/USD").then(function (d) { return d && d.rates ? d.rates : null; });
   var gold = getJSON("https://api.gold-api.com/price/XAU").then(function (d) { return d && d.price ? d.price : null; });
   var wx = getJSON("https://api.open-meteo.com/v1/forecast?latitude=31.52,24.86,33.69&longitude=74.35,67.01,73.06&current=temperature_2m,weather_code&timezone=Asia%2FKarachi");
   var fc = getJSON("https://api.open-meteo.com/v1/forecast?latitude=31.52&longitude=74.35&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FKarachi&forecast_days=7");
@@ -117,9 +126,19 @@
     document.querySelectorAll("#w-prayer .ptime").forEach(function (el) { el.classList.toggle("now", el.getAttribute("data-k") === next.k); });
   }
   Promise.all([usd, gold, wx, prs, fc]).then(function (res) {
-    var pkr = res[0], g = res[1], wxx = res[2];
+    var rates = res[0], pkr = rates ? rates.PKR : null, g = res[1], wxx = res[2];
     $("w-usd").textContent = pkr ? fmt(pkr) : "—";
-    usdRate = pkr; convTick();
+    usdRate = pkr; fxRates = rates; convTick();
+    var fxEl = $("w-fx");
+    if (fxEl) {
+      if (rates && pkr) {
+        var sym = { GBP: "£", EUR: "€", SAR: "SR ", AED: "AED ", CNY: "¥" };
+        fxEl.innerHTML = ["GBP", "EUR", "SAR", "AED", "CNY"].map(function (c) {
+          var v = rates[c] ? pkr / rates[c] : null;
+          return '<span class="fxchip">' + sym[c] + '1 = ' + (v ? fmt(v) : "—") + '</span>';
+        }).join("");
+      } else { fxEl.textContent = "—"; }
+    }
     if (pkr && g) {
       var g24 = Math.round(g / 31.1035 * 11.664 * pkr / 100) * 100;
       var g22 = Math.round(g24 * 22 / 24 / 100) * 100;
@@ -142,9 +161,14 @@
       fel.innerHTML = rows.join("");
     }
     var prAll = res[3];
-    if (prAll) { cities.forEach(function (c, i) { if (prAll[i]) prayerData[c] = prAll[i]; }); }
+    if (prAll) { cities.forEach(function (c, i) { if (prAll[i] && prAll[i].timings) prayerData[c] = prAll[i].timings; }); }
     if (Object.keys(prayerData).length) renderPrayer();
     else $("w-prayer").textContent = "—";
+    var hjEl = $("w-hijri");
+    if (hjEl) {
+      var hj = (prAll && prAll[0] && prAll[0].date) ? prAll[0].date.hijri : null;
+      hjEl.textContent = hj ? (ur ? (hj.day + " " + hj.month.ar + " " + hj.year + "ھ") : (hj.day + " " + hj.month.en + " " + hj.year + " AH")) : "—";
+    }
     $("w-updated").textContent = (ur ? "تازہ ترین " : "Live ") +
       new Date().toLocaleString("en-GB", { timeZone: "Asia/Karachi", hour: "2-digit", minute: "2-digit", hour12: true }) + " PKT" +
       (ur ? " · ذرائع: exchangerate-api، gold-api، Open-Meteo، Aladhan" : " · Sources: exchangerate-api, gold-api, Open-Meteo, Aladhan");
@@ -228,4 +252,98 @@
       navigator.serviceWorker.register("/pakistan-fast-news/sw.js").catch(function () {});
     });
   }
+})();
+
+// "Suno" listen buttons: browser speechSynthesis (free, no key). One at a time;
+// tapping another card (or the same button) stops the current reading.
+(function () {
+  function hideAll() {
+    document.querySelectorAll(".suno-btn").forEach(function (b) { b.style.display = "none"; });
+  }
+  if (!("speechSynthesis" in window)) { hideAll(); return; }
+  var currentBtn = null;
+  function stopAll() {
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    if (currentBtn) {
+      currentBtn.classList.remove("speaking");
+      currentBtn.textContent = currentBtn.getAttribute("data-label") || "🔊 Listen";
+      currentBtn = null;
+    }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".suno-btn");
+    if (!b) return;
+    if (currentBtn === b) { stopAll(); return; }
+    stopAll();
+    var text = b.getAttribute("data-speak") || "";
+    if (!text) return;
+    var isUr = b.getAttribute("data-lang") === "ur";
+    if (!b.getAttribute("data-label")) b.setAttribute("data-label", b.textContent);
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = isUr ? "ur-PK" : "en-US";
+    u.rate = 1;
+    b.classList.add("speaking");
+    b.textContent = isUr ? "⏹ بند کریں" : "⏹ Stop";
+    currentBtn = b;
+    u.onend = function () { stopAll(); };
+    u.onerror = function () { stopAll(); };
+    window.speechSynthesis.speak(u);
+  });
+})();
+
+// Cricket live score strip (SportScore free API, no key; verified 2026-11-11:
+// GET https://sportscore.com/api/v1/matches/?sport=cricket&status=live returns
+// {matches:[{home,away,home_score,away_score,status,status_text,time,competition,url}]}.
+// The status filter is loose, so live matches are filtered client-side.
+// Order: live match with a real score first (Pakistan preferred) -> any live match
+// -> latest finished match with its time -> clean "no live match" state. Never faked.
+(function () {
+  var el = document.getElementById("cricket-strip");
+  if (!el) return;
+  var isUr = el.getAttribute("data-lang") === "ur";
+  var body = el.querySelector(".cbody");
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function scoreTxt(v) { return (v && v !== "-") ? v : "—"; }
+  function hasScore(m) { return (m.home_score && m.home_score !== "-") || (m.away_score && m.away_score !== "-"); }
+  function isPak(m) { return /pakistan/i.test((m.home || "") + " " + (m.away || "")); }
+  function link(url, label) { return '<p class="clink"><a href="https://sportscore.com' + esc(url || "/cricket") + '" target="_blank" rel="noopener">' + label + '</a></p>'; }
+  function renderMatch(m, state) {
+    var badge = state === "live" ? (isUr ? "🔴 لائیو" : "🔴 LIVE") : (isUr ? "مکمل" : "Finished");
+    var when = "";
+    try {
+      var d = new Date(m.time);
+      when = d.toLocaleString(isUr ? "ur-PK" : "en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    } catch (e) {}
+    body.innerHTML = '<p class="cbadge">' + badge + ' · ' + esc(m.competition || "") + '</p>'
+      + '<p class="cteams">' + esc(m.home) + ' <b>' + esc(scoreTxt(m.home_score)) + '</b> vs <b>' + esc(scoreTxt(m.away_score)) + '</b> ' + esc(m.away) + '</p>'
+      + '<p class="cstatus">' + esc(m.status_text || "") + (when ? ' · ' + esc(when) + ' PKT' : '') + '</p>'
+      + link(m.url, isUr ? 'مکمل اسکور کارڈ دیکھیں ↗' : 'Full scorecard ↗');
+  }
+  function renderEmpty() {
+    body.innerHTML = '<p class="cstatus">' + (isUr ? 'اس وقت کوئی لائیو میچ نہیں ہے۔' : 'No live match right now.') + '</p>'
+      + link("/cricket", isUr ? 'لائیو اسکور دیکھیں ↗' : 'See live scores ↗');
+  }
+  function load() {
+    fetch("https://sportscore.com/api/v1/matches/?sport=cricket&status=live")
+      .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+      .then(function (d) {
+        var list = (d && d.matches) || [];
+        var live = list.filter(function (m) { return m.status === "live"; });
+        live.sort(function (a, b) {
+          if (hasScore(b) !== hasScore(a)) return (hasScore(b) ? 1 : 0) - (hasScore(a) ? 1 : 0);
+          return (isPak(b) ? 1 : 0) - (isPak(a) ? 1 : 0);
+        });
+        if (live.length) { renderMatch(live[0], "live"); return; }
+        var fin = list.filter(function (m) { return m.status === "finished"; });
+        fin.sort(function (a, b) { return new Date(b.time) - new Date(a.time); });
+        if (fin.length) { renderMatch(fin[0], "finished"); return; }
+        renderEmpty();
+      })
+      .catch(function () {
+        body.innerHTML = '<p class="cstatus">' + (isUr ? 'اسکور ابھی دستیاب نہیں ہے — براہ کرم دوبارہ کوشش کریں۔' : 'Score unavailable right now — please try again.') + '</p>'
+          + link("/cricket", isUr ? 'لائیو اسکور دیکھیں ↗' : 'See live scores ↗');
+      });
+  }
+  load();
+  setInterval(function () { if (!document.hidden) load(); }, 120000);
 })();

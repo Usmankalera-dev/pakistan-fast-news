@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var f=localStorage.getItem("pfn-fss");if(f)document.documentElement.style.setProperty("--fss",f);var t=localStorage.getItem("pfn-theme");if(t){document.documentElement.setAttribute("data-theme",t)}else if(window.matchMedia("(prefers-color-scheme: dark)").matches){document.documentElement.setAttribute("data-theme","dark")}}catch(e){}</script>
+<title>Prayer Times — Monthly Timetable (Lahore, Karachi, Islamabad) | Pakistan Fast News</title>
+<meta name="description" content="Monthly prayer timetable for Lahore, Karachi and Islamabad — Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, with Hijri dates, from the Aladhan API.">
+<link rel="canonical" href="https://usmankalera-dev.github.io/pakistan-fast-news/prayer.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pakistan Fast News">
+<meta property="og:title" content="Prayer Times — Monthly Timetable (Lahore, Karachi, Islamabad) | Pakistan Fast News">
+<meta property="og:description" content="Monthly prayer timetable for Lahore, Karachi and Islamabad — Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, with Hijri dates, from the Aladhan API.">
+<meta property="og:url" content="https://usmankalera-dev.github.io/pakistan-fast-news/prayer.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Prayer Times — Monthly Timetable (Lahore, Karachi, Islamabad) | Pakistan Fast News">
+<meta name="twitter:description" content="Monthly prayer timetable for Lahore, Karachi and Islamabad — Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha, with Hijri dates, from the Aladhan API.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8102e">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20261111r1">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Prayer Times — Monthly Timetable | Pakistan Fast News", "url": "https://usmankalera-dev.github.io/pakistan-fast-news/prayer.html"}</script>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+<a class="logo" href="index.html"><img src="favicon.svg" alt="Pakistan Fast News logo" width="36" height="36" class="sitelogo"><span class="logotext">Pakistan <b>Fast News</b><small>Pakistan's fastest headlines</small></span></a>
+<div class="clock"><span class="livedot" aria-hidden="true"></span><b>LIVE</b> <span id="clock"></span><span class="upd">Updated 11 November 2026, 01:19 PM PKT</span></div>
+<button id="theme-toggle" class="themetoggle" type="button" aria-label="Dark mode">🌙</button>
+<span class="fss"><button id="fs-minus" class="fsbtn" type="button" aria-label="Smaller text">A−</button><button id="fs-plus" class="fsbtn" type="button" aria-label="Larger text">A+</button></span>
+</div></header>
+<nav class="mainnav" aria-label="Sections"><div class="wrap"><a href="index.html">Home</a>
+<a href="pakistan.html">Pakistan</a>
+<a href="world.html">World</a>
+<a href="business.html">Business</a>
+<a href="sports.html">Sports</a>
+<a href="tech.html">Tech</a>
+<a href="entertainment.html">Entertainment</a>
+<a href="editorial.html">✍️ Exclusive</a>
+<a href="videos.html" class="vidlink">▶ Videos</a>
+<a href="live-tv.html">📺 Live TV</a>
+<a href="prayer.html" class="active">🕌 Prayer Times</a>
+<a href="ur/index.html">اردو</a></div></nav>
+<main class="wrap">
+<div class="today" id="today-widget" role="status">
+<div class="trow"><span class="tlabel">💵 Dollar</span><span class="tval">$1 = <span id="w-usd">…</span><span class="conv"><input id="w-conv" type="number" value="10" min="0" inputmode="decimal" aria-label="Amount"> <select id="w-cur" aria-label="Currency"><option value="USD" selected>USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CNY">CNY</option></select> = <b id="w-conv-out">…</b></span></span></div>
+<div class="trow"><span class="tlabel">💱 Currencies</span><span class="tval" id="w-fx">…</span></div>
+<div class="trow"><span class="tlabel">🌙 Hijri date</span><span class="tval" id="w-hijri">…</span></div>
+<div class="trow"><span class="tlabel">🪙 Gold · 1 tola</span><span class="tval" id="w-gold">…</span></div>
+<div class="trow"><span class="tlabel">🌤️ Weather</span><span class="tval" id="w-weather">…</span></div>
+<div class="trow"><span class="tlabel">🕌 Prayer</span><span class="tval"><span class="pcities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span id="w-prayer">…</span></span></div>
+<div class="trow"><span class="tlabel">📅 Lahore · 7 days</span><span class="tval"><span class="fgrid" id="w-forecast"></span></span></div>
+<div class="tsrc" id="w-updated"></div>
+</div>
+<h1>🕌 Prayer times — monthly timetable</h1>
+<div class="search"><span class="searchicon" aria-hidden="true">🔍</span><input id="q" type="search" placeholder="Search headlines…" aria-label="Search headlines"></div>
+<p class="crumb"><a href="index.html">Home</a> / Prayer Times</p><p class="vintro">Monthly prayer timetable — Fajr to Isha for Lahore, Karachi and Islamabad. Times come live from the Aladhan prayer-times API (calculation method: University of Islamic Sciences, Karachi).</p><div class="prayerctl"><span class="pcities" id="prayer-cities"><button type="button" class="pcity active" data-city="Lahore">Lahore</button><button type="button" class="pcity" data-city="Karachi">Karachi</button><button type="button" class="pcity" data-city="Islamabad">Islamabad</button></span><span class="monthnav"><button type="button" id="pmonth-prev" aria-label="Previous month">‹ Prev</button><b id="pmonth-label">…</b><button type="button" id="pmonth-next" aria-label="Next month">Next ›</button></span></div><div class="ptable-wrap"><table class="ptable" id="prayer-table"><thead><tr><th>Day</th><th>Date</th><th>Fajr</th><th>Sunrise</th><th>Dhuhr</th><th>Asr</th><th>Maghrib</th><th>Isha</th></tr></thead><tbody><tr><td colspan="8" class="ploading">Loading prayer times…</td></tr></tbody></table></div><p class="fine">Source: Aladhan prayer times API · All times local (PKT). Hijri dates are shown under each Gregorian date.</p><script>
+(function(){
+  var months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var city="Lahore";
+  var now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Karachi"}));
+  var year=now.getFullYear(), month=now.getMonth()+1;
+  function fmt12(t){var p=String(t).replace(/\(.*\)/,"").trim().split(":");var h=+p[0],m=p[1];var ap=h>=12?"PM":"AM";h=h%12;if(h===0)h=12;return h+":"+m+" "+ap;}
+  function load(){
+    document.getElementById("pmonth-label").textContent=months[month-1]+" "+year;
+    var tb=document.querySelector("#prayer-table tbody");
+    tb.innerHTML='<tr><td colspan="8" class="ploading">Loading prayer times…</td></tr>';
+    fetch("https://api.aladhan.com/v1/calendarByCity/"+year+"/"+month+"?city="+encodeURIComponent(city)+"&country=Pakistan&method=1")
+      .then(function(r){if(!r.ok)throw new Error("http "+r.status);return r.json();}).then(function(d){
+        if(!d||!d.data||!d.data.length)throw new Error("empty");
+        var today=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Karachi"}));
+        var rows=d.data.map(function(day){
+          var g=day.date.gregorian,hj=day.date.hijri,t=day.timings;
+          var isToday=(+g.day===today.getDate()&&+g.month.number===today.getMonth()+1&&+g.year===today.getFullYear());
+          return '<tr'+(isToday?' class="today-row"':'')+'><td>'+g.weekday.en.slice(0,3)+'</td><td><b>'+g.day+' '+g.month.en+'</b><br><small>'+hj.day+' '+hj.month.en+' '+hj.year+' AH</small></td><td>'+fmt12(t.Fajr)+'</td><td>'+fmt12(t.Sunrise)+'</td><td>'+fmt12(t.Dhuhr)+'</td><td>'+fmt12(t.Asr)+'</td><td>'+fmt12(t.Maghrib)+'</td><td>'+fmt12(t.Isha)+'</td></tr>';
+        });
+        tb.innerHTML=rows.join("");
+      }).catch(function(){
+        tb.innerHTML='<tr><td colspan="8" class="ploading">Could not load prayer times right now — please check your connection and try again.</td></tr>';
+      });
+  }
+  document.querySelectorAll("#prayer-cities .pcity").forEach(function(b){b.addEventListener("click",function(){city=b.getAttribute("data-city");document.querySelectorAll("#prayer-cities .pcity").forEach(function(x){x.classList.toggle("active",x===b);});load();});});
+  document.getElementById("pmonth-prev").addEventListener("click",function(){month--;if(month<1){month=12;year--;}load();});
+  document.getElementById("pmonth-next").addEventListener("click",function(){month++;if(month>12){month=1;year++;}load();});
+  load();
+})();
+</script>
+</main>
+<footer><div class="wrap"><div class="fgrid"><div class="fcol fbrand"><a class="flogo" href="index.html"><img src="favicon.svg" alt="" width="38" height="38"> Pakistan <b>Fast News</b></a><p>The fastest headlines from Pakistan and the world — politics, business, sports, tech and entertainment, updated around the clock.</p><p>Fast and free: no ads, no trackers, no heavy scripts.</p></div><div class="fcol"><h4>Sections</h4><ul><li><a href="pakistan.html">Pakistan</a></li><li><a href="world.html">World</a></li><li><a href="business.html">Business</a></li><li><a href="sports.html">Sports</a></li><li><a href="tech.html">Tech</a></li><li><a href="entertainment.html">Entertainment</a></li><li><a href="editorial.html">✍️ Exclusive</a></li><li><a href="videos.html">▶ Videos</a></li><li><a href="live-tv.html">📺 Live TV</a></li><li><a href="prayer.html">🕌 Prayer Times</a></li></ul></div><div class="fcol fwatch"><h4>Watch</h4><ul><li><a class="fchan" href="videos.html#geo"><img src="yt-geo.jpg" alt="" width="22" height="22" loading="lazy">Geo News</a></li><li><a class="fchan" href="videos.html#ary"><img src="yt-ary.jpg" alt="" width="22" height="22" loading="lazy">ARY News</a></li><li><a class="fchan" href="videos.html#dawn"><img src="yt-dawn.jpg" alt="" width="22" height="22" loading="lazy">Dawn News</a></li><li><a class="fchan" href="videos.html#samaa"><img src="yt-samaa.jpg" alt="" width="22" height="22" loading="lazy">Samaa TV</a></li><li><a class="fchan" href="videos.html#dunya"><img src="yt-dunya.jpg" alt="" width="22" height="22" loading="lazy">Dunya News</a></li><li><a class="fchan" href="videos.html#express"><img src="yt-express.jpg" alt="" width="22" height="22" loading="lazy">Express News</a></li><li><a class="fchan" href="videos.html#hum"><img src="yt-hum.jpg" alt="" width="22" height="22" loading="lazy">Hum News</a></li><li><a class="fchan" href="videos.html#bol"><img src="yt-bol.jpg" alt="" width="22" height="22" loading="lazy">BOL News</a></li><li><a class="fchan" href="videos.html#92news"><img src="yt-92news.jpg" alt="" width="22" height="22" loading="lazy">92 News HD</a></li><li><a class="fchan" href="videos.html#aaj"><img src="yt-aaj.jpg" alt="" width="22" height="22" loading="lazy">Aaj News</a></li><li><a class="fchan" href="videos.html#neo"><img src="yt-neo.jpg" alt="" width="22" height="22" loading="lazy">Neo News</a></li></ul></div><div class="fcol fsources"><h4>Sources</h4><p>Headlines from:</p><span class="srclogochip"><img src="logo-dawn.png" alt="Dawn logo" height="22"></span><span class="srclogochip"><img src="logo-ary.svg" alt="ARY News logo" height="28"></span><span class="srclogochip"><img src="logo-bbc.gif" alt="BBC News logo" height="22"></span><span class="srclogochip"><img src="logo-thenews.svg" alt="The News logo" height="22"></span><p class="fine">Full stories open on the publishers’ sites — we never copy full articles. Videos play from the channels’ official YouTube channels.</p></div></div><div class="newsbox"><h3>📬 Get the headlines in your inbox</h3><p>One short email a day — the fastest Pakistan headlines, free. No spam, unsubscribe anytime.</p><form action="https://formsubmit.co/su92-bsaim-f25-025@superior.edu.pk" method="POST"><input type="hidden" name="_subject" value="New subscriber — Pakistan Fast News"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false"><input type="hidden" name="_autoresponse" value="Thank you for subscribing to Pakistan Fast News! You will get the fastest headlines from Pakistan and the world in your inbox. — Usman Kalera"><input type="email" name="email" placeholder="Your email address" required aria-label="Email address"><button type="submit">Subscribe</button></form><p class="fine">Powered by FormSubmit — your email is only used for this newsletter.</p></div><div class="fbot"><span>© 2026 Pakistan Fast News</span><span>Updated 11 November 2026, 01:19 PM PKT · <a href="sitemap.xml">Sitemap</a></span></div></div></footer>
+<script src="script.js" defer></script>
+<button id="totop" class="totop" type="button" aria-label="Back to top">↑</button>
+</body>
+</html>
