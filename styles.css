@@ -364,3 +364,61 @@ a,button,input,select{transition:color .15s ease,background-color .15s ease,bord
 #today-widget.w-loading #w-fx,#today-widget.w-loading #w-hijri,#today-widget.w-loading #w-gold,#today-widget.w-loading #w-weather,#today-widget.w-loading #w-prayer,#today-widget.w-loading #w-forecast{position:relative;color:transparent;overflow:hidden;border-radius:6px}
 #today-widget.w-loading #w-fx::after,#today-widget.w-loading #w-hijri::after,#today-widget.w-loading #w-gold::after,#today-widget.w-loading #w-weather::after,#today-widget.w-loading #w-prayer::after,#today-widget.w-loading #w-forecast::after{content:"";position:absolute;inset:2px 0;border-radius:6px;background:linear-gradient(90deg,var(--thumb-bg) 25%,var(--border) 50%,var(--thumb-bg) 75%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* ---- Upgrade round 3.5 (2026-11-11): Suno Play-all, FX trend, Hijri calendar,
+   Qibla, cricket page, global search ---- */
+[hidden]{display:none!important}
+/* Suno Play-all bar (homepage) */
+.suno-player{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--soft);border:1px solid var(--soft-border);border-radius:14px;padding:10px 12px;margin:14px 0;box-shadow:var(--shadow-sm)}
+.suno-playall{font:inherit;font-weight:800;font-size:15px;padding:9px 16px;border-radius:20px;border:0;background:#0b7a3e;color:#fff;cursor:pointer}
+.suno-playall:hover{filter:brightness(1.1)}
+.suno-stop{font:inherit;font-weight:700;font-size:14px;padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer}
+.suno-speed{display:flex;gap:4px}
+.suno-speed button{font:inherit;font-size:13.5px;font-weight:700;padding:6px 10px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer}
+.suno-speed button.active{background:#0b7a3e;border-color:#0b7a3e;color:#fff}
+.suno-now{font-size:13.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+article.suno-playing{outline:2px solid #0b7a3e;outline-offset:2px}
+/* FX trend sparkline under the currency chips */
+.fxtrend{display:block;margin-top:8px}
+.fxtrend svg{display:block;width:100%;height:34px}
+.fxtrend-txt{font-size:13px;color:var(--muted)}
+#w-swap{background:var(--card);border:1px solid var(--border);border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;color:var(--fg);line-height:1}
+#w-swap:hover{border-color:#c8102e}
+/* Hijri month calendar (prayer page) */
+.hijri-sec{margin:18px 0}
+.hijri-cal{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--card);box-shadow:var(--shadow-sm)}
+.hcal-head,.hcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.hcal-head{margin-bottom:6px}
+.hcal-head span{text-align:center;font-size:12.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.hday{background:var(--thumb-bg);border:1px solid var(--border);border-radius:8px;padding:5px 2px;text-align:center;line-height:1.35}
+.hday b{display:block;font-size:15px}
+.hday i{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+.hday.empty{background:transparent;border-color:transparent}
+.hday.today{background:#0b7a3e;border-color:#0b7a3e;color:#fff}
+.hday.today i{color:#d6f5e3}
+.hday.today b{color:#fff}
+/* Qibla direction box (prayer page) */
+.qibla-box{border:1px solid var(--border);border-radius:14px;padding:16px 18px;background:var(--card);margin:18px 0;box-shadow:var(--shadow-sm)}
+.qibla-box h2{border:0;padding:0;margin:0 0 8px}
+.qibla-line{display:flex;align-items:center;gap:14px;font-size:17px;font-weight:700;margin:0}
+.qarrow{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#0b7a3e;color:#fff;font-size:26px;flex:0 0 auto;transition:transform .4s ease}
+/* Cricket full scores page */
+.cmatch{border:1px solid var(--border);border-radius:14px;padding:14px 16px;background:var(--card);margin:0 0 12px;box-shadow:var(--shadow-sm)}
+.cmatch .cteams{font-size:17px}
+.cmatch .cstatus{margin-bottom:4px}
+/* Global search page */
+.search.big input{padding:14px 14px;padding-inline-start:42px;font-size:17px}
+.scount{font-size:15px;color:var(--muted);margin:6px 0 14px}
+.sresult{border-bottom:1px solid var(--border);padding:12px 2px}
+.sresult h3{font-size:17px;margin:0 0 3px}
+.sresult h3 a{color:var(--fg)}
+.sresult h3 a:hover{color:#c8102e}
+.smeta{font-size:13.5px;color:var(--muted);margin:0}
+@media(max-width:640px){
+  .suno-player{padding:10px}
+  .suno-now{flex-basis:100%;white-space:normal}
+  .hday b{font-size:13.5px}
+  .hday i{font-size:10px}
+  .hcal-head span{font-size:11px}
+  .qibla-line{font-size:15.5px}
+}
