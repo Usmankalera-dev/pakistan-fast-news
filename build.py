@@ -4,7 +4,7 @@ Run: python3 build.py  (fetches Dawn + ARY feeds, writes HTML pages in this fold
 """
 import html as H, json, re, urllib.request, xml.etree.ElementTree as ET
 from urllib.parse import quote as urlquote
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -41,6 +41,17 @@ YT_CHANNELS = [
     ("Aaj News", "UCgBAPAcLsh_MAPvJprIz89w", "aaj"),
     ("Neo News", "UCoVaeayixjVI12mAlmMSsXg", "neo"),
 ]
+
+# Videos older than this are dropped — BOL's feed returns 2018 junk (phone-unlock
+# tutorials), so a max-age filter keeps the videos page fresh. The >=100 guard
+# in main() still applies, so the page is never built with a thin list.
+VIDEO_MAX_AGE_DAYS = 60
+
+def fresh_videos(videos, now):
+    """Drop videos older than VIDEO_MAX_AGE_DAYS (keeps BOL's 2018 items out)."""
+    cutoff = now - timedelta(days=VIDEO_MAX_AGE_DAYS)
+    return [v for v in videos if v["dt"] >= cutoff]
+
 CAT_LABEL = {"pakistan": "Pakistan", "world": "World", "business": "Business",
              "sports": "Sports", "tech": "Tech", "entertainment": "Entertainment"}
 CAT_EMOJI = {"pakistan": "🇵🇰", "world": "🌍", "business": "💼",
@@ -319,7 +330,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261111r6">
+<link rel="stylesheet" href="styles.css?v=20261114r1">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -347,7 +358,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="script.js?v=20261111r5" defer></script>
+<script src="script.js?v=20261114r1" defer></script>
 <button id="totop" class="totop" type="button" aria-label="Back to top">↑</button>
 </body>
 </html>
@@ -468,19 +479,34 @@ def main():
 
     # ---- Videos page ----
     videos = fetch_videos()
-    print("videos:", len(videos), "| by channel:", {n: sum(1 for v in videos if v["channel"] == n) for n, _, _ in YT_CHANNELS})
+    _n_fetched = len(videos)
+    videos = fresh_videos(videos, now)
+    print("videos:", len(videos), "| by channel:", {n: sum(1 for v in videos if v["channel"] == n) for n, _, _ in YT_CHANNELS},
+          f"| dropped {_n_fetched - len(videos)} stale (>{VIDEO_MAX_AGE_DAYS}d)")
     cache_file = out_dir / "videos_cache.json"
     if len(videos) >= 100:
         cache_file.write_text(json.dumps([{**v, "dt": v["dt"].isoformat()} for v in videos], ensure_ascii=False), encoding="utf-8")
     else:
         try:
-            cached = json.loads(cache_file.read_text(encoding="utf-8"))
-            videos = [{**v, "dt": datetime.fromisoformat(v["dt"])} for v in cached]
+            cached = [{**v, "dt": datetime.fromisoformat(v["dt"])} for v in json.loads(cache_file.read_text(encoding="utf-8"))]
+            fresh_cached = fresh_videos(cached, now)
+            if len(fresh_cached) >= 100:
+                videos = fresh_cached
+                # prune the stale entries out of the cache file as well
+                cache_file.write_text(json.dumps([{**v, "dt": v["dt"].isoformat()} for v in videos], ensure_ascii=False), encoding="utf-8")
+            else:
+                # pathological: cache mostly stale — keep the full cache so the
+                # page is never built with fewer than 100 videos
+                videos = cached
+                print("videos: cache mostly stale after filter, kept unfiltered cache to stay >=100")
             print(f"videos: using cache ({len(videos)} videos)")
         except Exception as e:
             print("videos cache miss:", e)
     chan_btns = ['<button class="chan active" data-ch="all"><span class="chanlogo all">ALL</span><span>All Channels</span></button>']
+    _vcounts = {n: sum(1 for v in videos if v["channel"] == n) for n, _, _ in YT_CHANNELS}
     for name, cid, slug in YT_CHANNELS:
+        if _vcounts[name] == 0:
+            continue  # no videos left after the max-age filter (e.g. BOL) — no dead button
         chan_btns.append(
             '<button class="chan" data-ch="' + slug + '"><img class="chanlogo" src="yt-' + slug + '.jpg" alt="' + H.escape(name) + ' logo" width="64" height="64" loading="lazy"><span>' + H.escape(name) + '</span></button>')
     vcards = []

@@ -279,7 +279,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../styles.css?v=20261111r6">
+<link rel="stylesheet" href="../styles.css?v=20261114r1">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
@@ -307,7 +307,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 {body_html}
 </main>
 {footer_html}
-<script src="../script.js?v=20261111r5" defer></script>
+<script src="../script.js?v=20261114r1" defer></script>
 <button id="totop" class="totop" type="button" aria-label="اوپر جائیں">↑</button>
 </body>
 </html>

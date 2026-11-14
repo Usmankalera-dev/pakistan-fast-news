@@ -53,6 +53,10 @@ footer .fine{margin-top:8px;color:#888}
 .chanlogo{width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;margin:0 auto;border:2px solid var(--border);background:#fff}
 .chanlogo.all{display:flex;align-items:center;justify-content:center;background:#c8102e;color:#fff;font-weight:800;font-size:15px}
 .chan.active{border-color:#c8102e;background:var(--soft)}
+/* Desktop: wrap the channel filter into rows so all 12 buttons are visible
+   (was a horizontal scroll with Aaj cut off and Neo off-screen at 1280px).
+   Mobile keeps the swipeable scroll row. */
+@media(min-width:641px){.chanbar{flex-wrap:wrap;overflow-x:visible}}
 .vintro{font-size:15px;color:var(--desc);margin-bottom:8px}
 .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .vcard{border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--card)}
@@ -233,6 +237,9 @@ html[dir="rtl"] body{font-family:"Noto Naskh Arabic","Noto Nastaliq Urdu",Tahoma
 html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .logo,html[dir="rtl"] .mainnav a{font-family:"Noto Nastaliq Urdu","Noto Naskh Arabic",Tahoma,Arial,sans-serif}
 html[dir="rtl"] h2{line-height:2}
 html[dir="rtl"] h2.toplabel{line-height:1.9}
+/* Desktop: tighter Urdu nav links so all 14 fit in one row (the "English"
+   link was cut to "lish" at 1280px). Mobile keeps the scrollable nav. */
+@media(min-width:641px){html[dir="rtl"] .mainnav a{padding:11px 8px}}
 
 /* ---- Pretty round 2: overlay hero, category accents, search icon, pill readmore, entrance ---- */
 .sitelogo{width:40px;height:40px}
