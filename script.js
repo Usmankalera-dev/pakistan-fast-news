@@ -437,6 +437,9 @@
 // The status filter is loose, so live matches are filtered client-side.
 // Order: live match with a real score first (Pakistan preferred) -> any live match
 // -> latest finished match with its time -> clean "no live match" state. Never faked.
+// A live match with no score data yet shows teams + "Score not available yet",
+// never "— vs —" under the LIVE badge (2026-11-14: free API returns "-" scores
+// for matches that just started, e.g. Pakistan U19 vs India U19).
 (function () {
   var el = document.getElementById("cricket-strip");
   if (!el) return;
@@ -447,6 +450,9 @@
   function hasScore(m) { return (m.home_score && m.home_score !== "-") || (m.away_score && m.away_score !== "-"); }
   function isPak(m) { return /pakistan/i.test((m.home || "") + " " + (m.away || "")); }
   function link(url, label) { return '<p class="clink"><a href="https://sportscore.com' + esc(url || "/cricket") + '" target="_blank" rel="noopener">' + label + '</a></p>'; }
+  // A live match whose feed carries no score yet ("-" / null for both teams)
+  // is shown honestly: teams with no score line, plus a "Score not available
+  // yet" note — never a bare "— vs —" under a LIVE badge. Never faked.
   function renderMatch(m, state) {
     var badge = state === "live" ? (isUr ? "🔴 لائیو" : "🔴 LIVE") : (isUr ? "مکمل" : "Finished");
     var when = "";
@@ -454,9 +460,14 @@
       var d = new Date(m.time);
       when = d.toLocaleString(isUr ? "ur-PK" : "en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     } catch (e) {}
+    var scored = hasScore(m);
+    var teams = scored
+      ? esc(m.home) + ' <b>' + esc(scoreTxt(m.home_score)) + '</b> vs <b>' + esc(scoreTxt(m.away_score)) + '</b> ' + esc(m.away)
+      : esc(m.home) + ' vs ' + esc(m.away);
+    var noScore = (!scored && state === "live") ? ' · ' + (isUr ? "اسکور ابھی دستیاب نہیں" : "Score not available yet") : "";
     body.innerHTML = '<p class="cbadge">' + badge + ' · ' + esc(m.competition || "") + '</p>'
-      + '<p class="cteams">' + esc(m.home) + ' <b>' + esc(scoreTxt(m.home_score)) + '</b> vs <b>' + esc(scoreTxt(m.away_score)) + '</b> ' + esc(m.away) + '</p>'
-      + '<p class="cstatus">' + esc(m.status_text || "") + (when ? ' · ' + esc(when) + ' PKT' : '') + '</p>'
+      + '<p class="cteams">' + teams + '</p>'
+      + '<p class="cstatus">' + esc(m.status_text || "") + noScore + (when ? ' · ' + esc(when) + ' PKT' : '') + '</p>'
       + link(m.url, isUr ? 'مکمل اسکور کارڈ دیکھیں ↗' : 'Full scorecard ↗');
   }
   function renderEmpty() {
@@ -554,11 +565,18 @@
       return new Date(m.time).toLocaleString(isUr ? "ur-PK" : "en-GB", { timeZone: "Asia/Karachi", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     } catch (e) { return ""; }
   }
+  // Same honesty rule as the strip: a live match with no score data shows
+  // the teams with no score line + a "Score not available yet" note.
   function matchHtml(m, state) {
     var badge = state === "live" ? (isUr ? "🔴 لائیو" : "🔴 LIVE") : (isUr ? "مکمل" : "Finished");
+    var scored = hasScore(m);
+    var teams = scored
+      ? esc(m.home) + ' <b>' + esc(scoreTxt(m.home_score)) + '</b> vs <b>' + esc(scoreTxt(m.away_score)) + '</b> ' + esc(m.away)
+      : esc(m.home) + ' vs ' + esc(m.away);
+    var noScore = (!scored && state === "live") ? ' · ' + (isUr ? "اسکور ابھی دستیاب نہیں" : "Score not available yet") : "";
     return '<article class="cmatch"><p class="cbadge">' + badge + ' · ' + esc(m.competition || "") + '</p>'
-      + '<p class="cteams">' + esc(m.home) + ' <b>' + esc(scoreTxt(m.home_score)) + '</b> vs <b>' + esc(scoreTxt(m.away_score)) + '</b> ' + esc(m.away) + '</p>'
-      + '<p class="cstatus">' + esc(m.status_text || "") + (fmtWhen(m) ? ' · ' + fmtWhen(m) + ' PKT' : '') + '</p>'
+      + '<p class="cteams">' + teams + '</p>'
+      + '<p class="cstatus">' + esc(m.status_text || "") + noScore + (fmtWhen(m) ? ' · ' + fmtWhen(m) + ' PKT' : '') + '</p>'
       + '<p class="clink"><a href="https://sportscore.com' + esc(m.url || "/cricket") + '" target="_blank" rel="noopener">' + (isUr ? "مکمل اسکور کارڈ ↗" : "Full scorecard ↗") + '</a></p></article>';
   }
   function fetchJson(url, ms) {
