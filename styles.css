@@ -237,9 +237,14 @@ html[dir="rtl"] body{font-family:"Noto Naskh Arabic","Noto Nastaliq Urdu",Tahoma
 html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .logo,html[dir="rtl"] .mainnav a{font-family:"Noto Nastaliq Urdu","Noto Naskh Arabic",Tahoma,Arial,sans-serif}
 html[dir="rtl"] h2{line-height:2}
 html[dir="rtl"] h2.toplabel{line-height:1.9}
-/* Desktop: tighter Urdu nav links so all 14 fit in one row (the "English"
-   link was cut to "lish" at 1280px). Mobile keeps the scrollable nav. */
-@media(min-width:641px){html[dir="rtl"] .mainnav a{padding:11px 8px}}
+/* Desktop: nav is full-width and centred so all 14 links fit in one row
+   (the 1060px container clipped Cricket / Search / اردو — live audit
+   2026-11-21). 8px padding + safe center: centred when it fits,
+   left-aligned + scrollable when it doesn't. Mobile keeps the scroll nav. */
+@media(min-width:641px){
+  .mainnav .wrap{max-width:none;justify-content:flex-start;justify-content:safe center}
+  .mainnav a{padding:11px 8px}
+}
 
 /* ---- Pretty round 2: overlay hero, category accents, search icon, pill readmore, entrance ---- */
 .sitelogo{width:40px;height:40px}

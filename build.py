@@ -70,7 +70,10 @@ PK_KW = ["pakistan", "lahore", "karachi", "islamabad", "punjab", "sindh", "khybe
 
 def clean(txt):
     txt = H.unescape(re.sub(r"<[^>]+>", " ", txt or ""))
-    return re.sub(r"\s+", " ", txt).strip()
+    txt = re.sub(r"\s+", " ", txt).strip()
+    # Source titles sometimes end with a stray comma (e.g. UR top story
+    # "headline, ") — a trailing comma is never intentional in a headline.
+    return txt.rstrip(",،").strip()
 
 def categorize(title, desc, feed_cat):
     if feed_cat:
@@ -330,7 +333,7 @@ def page(title, desc, canon, h1, body_html, json_ld, active="index.html", ticker
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261114r1">
+<link rel="stylesheet" href="styles.css?v=20261121r1">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body>
